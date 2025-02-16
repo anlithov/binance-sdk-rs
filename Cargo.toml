@@ -2,7 +2,7 @@
 name = "binance-sdk-rs"
 version = "0.1.0"
 license = "MIT"
-authors = ["anlithov"]
+authors = ["anlithov <anlithov@gmail.com>"]
 edition = "2021"
 description = "Rust Async SDK for the Binance"
 keywords = ["crypto", "trading", "binance"]
