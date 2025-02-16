@@ -1,4 +1,4 @@
 # binance-sdk-rs
 
-Fork of library:
-
+Refactored Fork of library:
+https://github.com/wisespace-io/binance-rs
