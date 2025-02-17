@@ -1,4 +1,4 @@
-use crate::rest::inner_client::InnerClientRest;
+use crate::rest::inner_client::InnerClient;
 use std::fmt::Display;
 
 pub mod market_depth;
@@ -11,7 +11,7 @@ pub mod model;
 
 #[derive(Clone)]
 pub struct Market {
-  pub client: InnerClientRest,
+  pub client: InnerClient,
   pub recv_window: u64,
 }
 

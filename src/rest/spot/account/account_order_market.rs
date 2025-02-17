@@ -99,7 +99,7 @@ impl Account {
       time_in_force: TimeInForce::GTC,
       new_client_order_id: None,
     };
-    let order = build_order(buy);
+    let order = buy.build_order();
     let request = build_signed_request(order, self.recv_window)?;
 
     self
@@ -130,7 +130,7 @@ impl Account {
       time_in_force: TimeInForce::GTC,
       new_client_order_id: None,
     };
-    let order = build_order(buy);
+    let order = buy.build_order();
     let request = build_signed_request(order, self.recv_window)?;
 
     match self

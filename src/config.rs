@@ -1,8 +1,12 @@
+const REST_API_HOST: &str = "https://api.binance.com";
+const WS_HOST: &str = "wss://stream.binance.com/ws";
+const FUTURES_REST_API_HOST: &str = "https://fapi.binance.com";
+const FUTURES_WS_HOST: &str = "wss://fstream.binance.com/ws";
+
 #[derive(Clone, Debug)]
 pub struct Config {
   pub rest_api_host: String,
   pub ws_host: String,
-
   pub futures_rest_api_host: String,
   pub futures_ws_host: String,
 
@@ -12,11 +16,10 @@ pub struct Config {
 impl Default for Config {
   fn default() -> Self {
     Self {
-      rest_api_host: "https://api.binance.com".into(),
-      ws_host: "wss://stream.binance.com/ws".into(),
-
-      futures_rest_api_host: "https://fapi.binance.com".into(),
-      futures_ws_host: "wss://fstream.binance.com/ws".into(),
+      rest_api_host: REST_API_HOST.into(),
+      ws_host: WS_HOST.into(),
+      futures_rest_api_host: FUTURES_REST_API_HOST.into(),
+      futures_ws_host: FUTURES_WS_HOST.into(),
 
       recv_window: 5000,
     }

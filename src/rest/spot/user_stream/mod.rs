@@ -2,13 +2,13 @@ use crate::rest::endpoints::{Spot, API};
 use crate::rest::spot::user_stream::model::{Success, UserDataStream};
 use anyhow::Result;
 
-use crate::rest::inner_client::InnerClientRest;
+use crate::rest::inner_client::InnerClient;
 
 pub mod model;
 
 #[derive(Clone)]
 pub struct UserStream {
-  pub client: InnerClientRest,
+  pub client: InnerClient,
   pub recv_window: u64,
 }
 

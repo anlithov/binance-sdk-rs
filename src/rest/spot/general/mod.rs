@@ -1,6 +1,6 @@
 use crate::model::EmptyResponse;
 use crate::rest::endpoints::{Spot, API};
-use crate::rest::inner_client::InnerClientRest;
+use crate::rest::inner_client::InnerClient;
 use crate::rest::spot::general::model::{
   ExchangeInformationResponse, ServerTimeResponse, SymbolInformationResponse,
 };
@@ -10,7 +10,7 @@ pub mod model;
 
 #[derive(Clone)]
 pub struct General {
-  pub client: InnerClientRest,
+  pub client: InnerClient,
 }
 
 impl General {

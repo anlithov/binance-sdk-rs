@@ -1,10 +1,11 @@
-use crate::rest::inner_client::InnerClientRest;
+use crate::rest::inner_client::InnerClient;
 
 pub mod model;
 pub mod order_builder;
 
 pub mod account_balance;
 pub mod account_order_cancel;
+pub mod account_order_custom;
 pub mod account_order_info;
 pub mod account_order_limit;
 pub mod account_order_market;
@@ -17,6 +18,6 @@ pub mod account_trade_rate_limits;
 
 #[derive(Clone)]
 pub struct Account {
-  pub client: InnerClientRest,
+  pub client: InnerClient,
   pub recv_window: u64,
 }

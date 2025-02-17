@@ -1,5 +1,5 @@
 use crate::config::Config;
-use crate::rest::inner_client::InnerClientRest;
+use crate::rest::inner_client::InnerClient;
 use crate::rest::spot::account::Account;
 
 /// A trait that all modules must implement to be a Binance API client module.
@@ -44,7 +44,7 @@ impl Binance for Account {
     config: &Config,
   ) -> Account {
     Account {
-      client: InnerClientRest::new(api_key, secret_key, config.rest_api_host.clone()),
+      client: InnerClient::new(api_key, secret_key, config.rest_api_host.clone()),
       recv_window: config.recv_window,
     }
   }

@@ -154,7 +154,7 @@ impl Account {
       new_client_order_id: None,
     };
 
-    let order = build_order(req);
+    let order = req.build_order();
     let request = build_signed_request(order, self.recv_window)?;
 
     self
@@ -193,7 +193,7 @@ impl Account {
       new_client_order_id: None,
     };
 
-    let order = build_order(req);
+    let order = req.build_order();
     let request = build_signed_request(order, self.recv_window)?;
 
     match self

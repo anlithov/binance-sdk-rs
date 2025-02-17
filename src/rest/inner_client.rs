@@ -13,16 +13,16 @@ use sha2::Sha256;
 type HmacSha256 = Hmac<Sha256>;
 
 #[derive(Clone)]
-pub struct InnerClientRest {
+pub struct InnerClient {
   api_key: String,
   secret_key: String,
   server_host: String,
   http_client: Client,
 }
 
-impl InnerClientRest {
+impl InnerClient {
   pub fn new(api_key: Option<String>, secret_key: Option<String>, server_host: String) -> Self {
-    InnerClientRest {
+    InnerClient {
       api_key: api_key.unwrap_or_default(),
       secret_key: secret_key.unwrap_or_default(),
       server_host,
@@ -31,7 +31,7 @@ impl InnerClientRest {
   }
 }
 
-impl InnerClientRest {
+impl InnerClient {
   pub async fn get_signed<T: DeserializeOwned>(
     &self,
     endpoint: API,
@@ -164,7 +164,7 @@ impl InnerClientRest {
   fn build_headers(&self, content_type: bool) -> Result<HeaderMap> {
     let mut custom_headers = HeaderMap::new();
 
-    custom_headers.insert(USER_AGENT, HeaderValue::from_static("binance-rs"));
+    custom_headers.insert(USER_AGENT, HeaderValue::from_static("binance-sdk-rs"));
     if content_type {
       custom_headers.insert(
         CONTENT_TYPE,
@@ -181,7 +181,10 @@ impl InnerClientRest {
 
   async fn handler<T: DeserializeOwned>(&self, response: Response) -> Result<T> {
     match response.status() {
-      StatusCode::OK => Ok(response.json::<T>().await?),
+      StatusCode::OK => {
+        let response = response.json::<T>().await?;
+        Ok(response)
+      }
       StatusCode::INTERNAL_SERVER_ERROR => {
         bail!("Internal Server Error");
       }
