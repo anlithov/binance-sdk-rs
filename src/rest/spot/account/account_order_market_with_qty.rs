@@ -10,7 +10,7 @@ use anyhow::Result;
 // Market orders with quote quantity
 impl Account {
   /// Place a MARKET order with quote quantity - BUY
-  pub async fn market_buy_with_quote_quantity<S, Q>(
+  pub async fn place_market_buy_order_with_quote_quantity<S, Q>(
     &self,
     symbol: S,
     quote_qty: Q,
@@ -20,14 +20,14 @@ impl Account {
     Q: Into<f64>,
   {
     self
-      .market_order_with_quote_quantity(symbol, quote_qty, OrderSide::Buy)
+      .place_market_order_with_quote_quantity(symbol, quote_qty, OrderSide::Buy)
       .await
   }
 
   /// Place a test MARKET order with quote quantity - BUY
   ///
   /// This order is sandboxed: it is validated, but not sent to the matching engine.
-  pub async fn test_market_buy_with_quote_quantity<S, Q>(
+  pub async fn test_place_market_buy_order_with_quote_quantity<S, Q>(
     &self,
     symbol: S,
     quote_qty: Q,
@@ -37,12 +37,12 @@ impl Account {
     Q: Into<f64>,
   {
     self
-      .test_market_order_with_quote_quantity(symbol, quote_qty, OrderSide::Buy)
+      .test_place_market_order_with_quote_quantity(symbol, quote_qty, OrderSide::Buy)
       .await
   }
 
   /// Place a market order - SELL
-  pub async fn market_sell_with_quote_quantity<S, Q>(
+  pub async fn place_market_sell_order_with_quote_quantity<S, Q>(
     &self,
     symbol: S,
     quote_qty: Q,
@@ -52,14 +52,14 @@ impl Account {
     Q: Into<f64>,
   {
     self
-      .market_order_with_quote_quantity(symbol, quote_qty, OrderSide::Sell)
+      .place_market_order_with_quote_quantity(symbol, quote_qty, OrderSide::Sell)
       .await
   }
 
   /// Place a market test order - SELL
   ///
   /// This order is sandboxed: it is validated, but not sent to the matching engine.
-  pub async fn test_market_sell_with_quote_quantity<S, Q>(
+  pub async fn test_place_market_sell_order_with_quote_quantity<S, Q>(
     &self,
     symbol: S,
     quote_qty: Q,
@@ -69,14 +69,14 @@ impl Account {
     Q: Into<f64>,
   {
     self
-      .test_market_order_with_quote_quantity(symbol, quote_qty, OrderSide::Sell)
+      .test_place_market_order_with_quote_quantity(symbol, quote_qty, OrderSide::Sell)
       .await
   }
 
-  async fn market_order_with_quote_quantity<S, Q>(
+  async fn place_market_order_with_quote_quantity<S, Q>(
     &self,
     symbol: S,
-    qty: Q,
+    quote_qty: Q,
     order_side: OrderSide,
   ) -> Result<OrderCreatedResponse>
   where
@@ -85,7 +85,7 @@ impl Account {
   {
     let buy = OrderQuoteQuantityRequest {
       symbol: symbol.into(),
-      quote_order_qty: qty.into(),
+      quote_order_qty: quote_qty.into(),
       price: 0.0,
       order_side,
       order_type: OrderType::Market,
@@ -101,7 +101,7 @@ impl Account {
       .await
   }
 
-  async fn test_market_order_with_quote_quantity<S, Q>(
+  async fn test_place_market_order_with_quote_quantity<S, Q>(
     &self,
     symbol: S,
     qty: Q,

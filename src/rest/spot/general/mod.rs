@@ -15,7 +15,7 @@ pub struct General {
 
 impl General {
   /// Test connectivity
-  pub async fn ping(&self) -> Result<String> {
+  pub async fn try_ping(&self) -> Result<String> {
     self
       .client
       .get::<EmptyResponse>(API::Spot(Spot::Ping), None)
@@ -25,23 +25,33 @@ impl General {
   }
 
   /// Check server time
-  pub async fn server_time(&self) -> Result<ServerTimeResponse> {
+  pub async fn fetch_server_time(&self) -> Result<ServerTimeResponse> {
     self.client.get(API::Spot(Spot::Time), None).await
   }
 
   /// Obtain exchange information.
   /// Current exchange trading rules and symbol information
-  pub async fn exchange_info(&self) -> Result<ExchangeInformationResponse> {
+  pub async fn fetch_exchange_info(&self) -> Result<ExchangeInformationResponse> {
     self.client.get(API::Spot(Spot::ExchangeInfo), None).await
   }
 
+  /// Obtain exchange information.
+  /// Current exchange trading rules and symbol information
+  pub async fn list_symbols_info(&self) -> Result<Vec<SymbolInformationResponse>> {
+    self
+      .client
+      .get::<ExchangeInformationResponse>(API::Spot(Spot::ExchangeInfo), None)
+      .await
+      .map(|r| r.symbols)
+  }
+
   /// Symbol Trade Rules & information
-  pub async fn symbol_info<S>(&self, symbol: S) -> Result<SymbolInformationResponse>
+  pub async fn fetch_symbol_info<S>(&self, symbol: S) -> Result<SymbolInformationResponse>
   where
     S: Into<String>,
   {
     let upper_symbol = symbol.into().to_uppercase();
-    match self.exchange_info().await {
+    match self.fetch_exchange_info().await {
       Ok(info) => {
         for item in info.symbols {
           if item.symbol == upper_symbol {

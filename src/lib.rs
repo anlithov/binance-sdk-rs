@@ -5,7 +5,7 @@
   unused_imports,
   unused_import_braces
 )]
-#[allow(dead_code)]
+#![allow(dead_code)]
 pub mod client;
 mod config;
 mod errors;

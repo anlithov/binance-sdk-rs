@@ -7,7 +7,7 @@ use std::collections::BTreeMap;
 
 impl Account {
   /// Retrieves allocation resulting from SOR order placement
-  pub async fn sor_allocation_record_by_order_id<S, STR>(
+  pub async fn fetch_sor_allocation_record_by_order_id<S, STR>(
     &self,
     symbol: S,
     order_id: STR,
@@ -41,7 +41,7 @@ impl Account {
   /// Get allocation >= that from_allocation_id
   ///
   /// LIMIT - 500 (default)
-  pub async fn sor_allocations_history_from_allocation_id<S, AI>(
+  pub async fn list_sor_allocations_history_from_allocation_id<S, AI>(
     &self,
     symbol: S,
     from_allocation_id: AI,
@@ -51,14 +51,20 @@ impl Account {
     AI: Into<u64>,
   {
     self
-      .sor_allocations_history_custom(symbol.into(), from_allocation_id.into(), None, None, None)
+      .list_sor_allocations_history_custom(
+        symbol.into(),
+        from_allocation_id.into(),
+        None,
+        None,
+        None,
+      )
       .await
   }
 
   /// Retrieves Recent Last 24h allocation resulting from SOR order placement
   ///
   /// LIMIT - 500 (default)
-  pub async fn sor_allocations_history_recent<S>(
+  pub async fn list_sor_allocations_history_recent<S>(
     &self,
     symbol: S,
   ) -> Result<Vec<TradeRecordResponse>>
@@ -66,7 +72,7 @@ impl Account {
     S: Into<String>,
   {
     self
-      .sor_allocations_history_custom(symbol.into(), None, None, None, None)
+      .list_sor_allocations_history_custom(symbol.into(), None, None, None, None)
       .await
   }
 
@@ -74,7 +80,7 @@ impl Account {
   ///
   /// e.g. 1739401957098/1739401957
   /// LIMIT - 500 (default)
-  pub async fn sor_allocations_history_from_time<S, STR>(
+  pub async fn list_sor_allocations_history_from_time<S, STR>(
     &self,
     symbol: S,
     start_time: STR,
@@ -84,7 +90,7 @@ impl Account {
     STR: Into<u64>,
   {
     self
-      .sor_allocations_history_custom(symbol.into(), None, start_time.into(), None, None)
+      .list_sor_allocations_history_custom(symbol.into(), None, start_time.into(), None, None)
       .await
   }
 
@@ -93,7 +99,7 @@ impl Account {
   ///
   /// e.g. 1739401957098/1739401957
   /// LIMIT - 500 (default)
-  pub async fn sor_allocations_history_by_timeframe<S, STR, END>(
+  pub async fn list_sor_allocations_history_by_timeframe<S, STR, END>(
     &self,
     symbol: S,
     start_time: STR,
@@ -105,7 +111,7 @@ impl Account {
     END: Into<u64>,
   {
     self
-      .sor_allocations_history_custom(
+      .list_sor_allocations_history_custom(
         symbol.into(),
         None,
         start_time.into(),
@@ -115,7 +121,7 @@ impl Account {
       .await
   }
 
-  pub async fn sor_allocations_history_custom<S, AI, STR, END, L>(
+  pub async fn list_sor_allocations_history_custom<S, AI, STR, END, L>(
     &self,
     symbol: S,
     from_allocation_id: AI,

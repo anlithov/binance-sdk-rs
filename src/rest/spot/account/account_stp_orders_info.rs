@@ -7,7 +7,7 @@ use std::collections::BTreeMap;
 
 impl Account {
   /// Find order that was expired because of Self Trade Prevention (STP).
-  pub async fn stp_order_record<S, O>(
+  pub async fn fetch_stp_order_record<S, O>(
     &self,
     symbol: S,
     order_id: O,
@@ -20,11 +20,11 @@ impl Account {
     parameters.insert("symbol".into(), symbol.into());
     parameters.insert("orderId".into(), order_id.into().to_string());
 
-    self.stp_order_record_by_params(parameters).await
+    self.fetch_stp_order_record_by_params(parameters).await
   }
 
   /// Find order that was expired because of Self Trade Prevention (STP).
-  pub async fn stp_order_record_by_prevented_match_id<S, P>(
+  pub async fn fetch_stp_order_record_by_prevented_match_id<S, P>(
     &self,
     symbol: S,
     prevented_match_id: P,
@@ -40,10 +40,10 @@ impl Account {
       prevented_match_id.into().to_string(),
     );
 
-    self.stp_order_record_by_params(parameters).await
+    self.fetch_stp_order_record_by_params(parameters).await
   }
 
-  async fn stp_order_record_by_params(
+  async fn fetch_stp_order_record_by_params(
     &self,
     parameters: BTreeMap<String, String>,
   ) -> Result<Option<StpRecordResponse>> {

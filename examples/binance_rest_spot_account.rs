@@ -29,30 +29,26 @@ async fn account_balances_and_info_example() {
 
   handle_result!(
     // Get current account information.
-    account.info_summary().await
+    account.fetch_info_summary().await
   );
   handle_result!(
     // Get current ALL non-zero account balances.
     // *Only free or locked > 0
-    account.balances().await
+    account.fetch_balances().await
   );
   handle_result!(
     // Get current FREE account balances.
     // *Only free > 0
-    account.balances_free().await
+    account.fetch_balances_free().await
   );
   handle_result!(
     // Get current LOCKED account balances.
     // *Only locked > 0
-    account.balances_locked().await
+    account.fetch_balances_locked().await
   );
   handle_result!(
     // Get balance for a single Asset
-    account.balance_single("USDT").await
-  );
-  handle_result!(
-    //
-    account.open_orders_all().await
+    account.fetch_balance_single("USDT").await
   );
 }
 
@@ -64,19 +60,15 @@ async fn account_order_action_example() {
 
   handle_result!(
     //
-    account.open_orders_all().await
+    account.list_all_open_orders().await
   );
   handle_result!(
     //
-    account.open_orders_by_symbol("HBARUSDT").await
+    account.list_open_orders_by_symbol("HBARUSDT").await
   );
   handle_result!(
     //
-    account.order_status("HBARUSDT", 2328238347_u64).await
-  );
-  handle_result!(
-    //
-    account.test_order_status("HBARUSDT", 2328238347_u64).await
+    account.fetch_order_status("HBARUSDT", 2328238347_u64).await
   );
   handle_result!(
     //
@@ -84,15 +76,13 @@ async fn account_order_action_example() {
   );
   handle_result!(
     //
-    account.limit_sell("HBARUSDT", 20f64, 0.3).await
+    account.place_limit_sell_order("HBARUSDT", 20f64, 0.3).await
   );
   handle_result!(
     //
-    account.test_limit_sell("HBARUSDT", 20f64, 0.3).await
-  );
-  handle_result!(
-    //
-    account.test_order_status("HBARUSDT", 2328238347_u64).await
+    account
+      .test_place_limit_sell_order("HBARUSDT", 20f64, 0.3)
+      .await
   );
   handle_result!(
     //

@@ -11,7 +11,7 @@ impl Market {
   /// This method reads from MEMORY, "trades_history_recent" - from DATABASE
   ///
   /// LIMIT - 500
-  pub async fn trades_list_recent_from_memory<S>(
+  pub async fn list_trades_history_recent_from_memory<S>(
     &self,
     symbol: S,
   ) -> Result<Vec<TradeRecordResponse>>
@@ -32,17 +32,19 @@ impl Market {
   /// Read Recent 24h Trade history
   ///
   /// LIMIT - 500 (default)
-  pub async fn trades_history_recent<S>(&self, symbol: S) -> Result<Vec<TradeRecordResponse>>
+  pub async fn list_trades_history_recent<S>(&self, symbol: S) -> Result<Vec<TradeRecordResponse>>
   where
     S: Into<String>,
   {
-    self.trades_history_custom(symbol.into(), None, None).await
+    self
+      .list_trades_history_custom(symbol.into(), None, None)
+      .await
   }
 
   /// Read Trade history from ID
   ///
   /// LIMIT - 500 (default)
-  pub async fn trades_history_from_id<S, I>(
+  pub async fn list_trades_history_from_id<S, I>(
     &self,
     symbol: S,
     from_id: I,
@@ -52,7 +54,7 @@ impl Market {
     I: Into<u64>,
   {
     self
-      .trades_history_custom(symbol.into(), from_id.into(), None)
+      .list_trades_history_custom(symbol.into(), from_id.into(), None)
       .await
   }
 
@@ -60,7 +62,7 @@ impl Market {
   ///
   /// e.g. 1739401957098/1739401957
   /// LIMIT - up to 1000
-  pub async fn trades_history_custom<S, I, L>(
+  pub async fn list_trades_history_custom<S, I, L>(
     &self,
     symbol: S,
     from_id: I,

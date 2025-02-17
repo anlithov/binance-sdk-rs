@@ -7,7 +7,7 @@ use std::collections::BTreeMap;
 
 impl Account {
   /// Read One order from history by "symbol" and "id"
-  pub async fn trade_record_by_order_id<S, O>(
+  pub async fn fetch_trade_record_by_order_id<S, O>(
     &self,
     symbol: S,
     order_id: O,
@@ -41,7 +41,7 @@ impl Account {
   /// Get trades >= that from_id
   ///
   /// LIMIT - 500 (default)
-  pub async fn trades_history_from_id<S, I>(
+  pub async fn list_trades_history_from_id<S, I>(
     &self,
     symbol: S,
     from_id: I,
@@ -51,19 +51,19 @@ impl Account {
     I: Into<u64>,
   {
     self
-      .trades_history_custom(symbol.into(), from_id.into(), None, None, None, None)
+      .list_trades_history_custom(symbol.into(), from_id.into(), None, None, None, None)
       .await
   }
 
   /// Read Recent Last 24h Trade history
   ///
   /// LIMIT - 500 (default)
-  pub async fn trades_history_recent<S>(&self, symbol: S) -> Result<Vec<TradeRecordResponse>>
+  pub async fn list_trades_history_recent<S>(&self, symbol: S) -> Result<Vec<TradeRecordResponse>>
   where
     S: Into<String>,
   {
     self
-      .trades_history_custom(symbol.into(), None, None, None, None, None)
+      .list_trades_history_custom(symbol.into(), None, None, None, None, None)
       .await
   }
 
@@ -71,7 +71,7 @@ impl Account {
   ///
   /// e.g. 1739401957098/1739401957
   /// LIMIT - 500 (default)
-  pub async fn trades_history_from_time<S, STR>(
+  pub async fn list_trades_history_from_time<S, STR>(
     &self,
     symbol: S,
     start_time: STR,
@@ -81,7 +81,7 @@ impl Account {
     STR: Into<u64>,
   {
     self
-      .trades_history_custom(symbol.into(), None, None, start_time.into(), None, None)
+      .list_trades_history_custom(symbol.into(), None, None, start_time.into(), None, None)
       .await
   }
 
@@ -90,7 +90,7 @@ impl Account {
   ///
   /// e.g. 1739401957098/1739401957
   /// LIMIT - 500 (default)
-  pub async fn trades_history_by_timeframe<S, STR, END>(
+  pub async fn list_trades_history_by_timeframe<S, STR, END>(
     &self,
     symbol: S,
     start_time: STR,
@@ -102,7 +102,7 @@ impl Account {
     END: Into<u64>,
   {
     self
-      .trades_history_custom(
+      .list_trades_history_custom(
         symbol.into(),
         None,
         None,
@@ -114,7 +114,7 @@ impl Account {
   }
 
   /// Read Trade history
-  pub async fn trades_history_custom<S, O, I, STR, END, L>(
+  pub async fn list_trades_history_custom<S, O, I, STR, END, L>(
     &self,
     symbol: S,
     order_id: O,

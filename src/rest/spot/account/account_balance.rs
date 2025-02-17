@@ -9,7 +9,7 @@ use std::collections::BTreeMap;
 // Balances
 impl Account {
   /// Get current account information.
-  pub async fn info_summary(&self) -> Result<AccountInformationResponse> {
+  pub async fn fetch_info_summary(&self) -> Result<AccountInformationResponse> {
     let request = build_signed_request(BTreeMap::new(), self.recv_window)?;
     self
       .client
@@ -19,8 +19,8 @@ impl Account {
 
   /// Get current ALL non-zero account balances.
   /// *Only free or locked > 0
-  pub async fn balances(&self) -> Result<Vec<AssetBalanceResponse>> {
-    self.info_summary().await.map(|r| {
+  pub async fn fetch_balances(&self) -> Result<Vec<AssetBalanceResponse>> {
+    self.fetch_info_summary().await.map(|r| {
       r.balances
         .into_iter()
         .filter(|asset| asset.free > 0.0 || asset.locked > 0.0)
@@ -30,8 +30,8 @@ impl Account {
 
   /// Get current FREE account balances.
   /// *Only free > 0
-  pub async fn balances_free(&self) -> Result<Vec<AssetBalanceResponse>> {
-    self.info_summary().await.map(|r| {
+  pub async fn fetch_balances_free(&self) -> Result<Vec<AssetBalanceResponse>> {
+    self.fetch_info_summary().await.map(|r| {
       r.balances
         .into_iter()
         .filter(|asset| asset.free > 0.0)
@@ -41,8 +41,8 @@ impl Account {
 
   /// Get current LOCKED account balances.
   /// *Only locked > 0
-  pub async fn balances_locked(&self) -> Result<Vec<AssetBalanceResponse>> {
-    self.info_summary().await.map(|r| {
+  pub async fn fetch_balances_locked(&self) -> Result<Vec<AssetBalanceResponse>> {
+    self.fetch_info_summary().await.map(|r| {
       r.balances
         .into_iter()
         .filter(|asset| asset.locked > 0.0)
@@ -51,11 +51,11 @@ impl Account {
   }
 
   /// Get Balance for a single Asset
-  pub async fn balance_single<S>(&self, asset: S) -> Result<AssetBalanceResponse>
+  pub async fn fetch_balance_single<S>(&self, asset: S) -> Result<AssetBalanceResponse>
   where
     S: Into<String>,
   {
-    match self.info_summary().await {
+    match self.fetch_info_summary().await {
       Ok(account) => {
         let cmp_asset = asset.into();
         for balance in account.balances {

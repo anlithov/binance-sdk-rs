@@ -8,7 +8,7 @@ use std::collections::BTreeMap;
 // Market Data endpoints
 impl Market {
   /// Order book at the default depth of 100
-  pub async fn depth<S>(&self, symbol: S) -> Result<OrderBookResponse>
+  pub async fn fetch_depth<S>(&self, symbol: S) -> Result<OrderBookResponse>
   where
     S: Into<String>,
   {
@@ -21,7 +21,7 @@ impl Market {
   }
 
   /// Order book at the default depth of 100
-  pub async fn depth_with_limit<S, L>(&self, symbol: S, limit: L) -> Result<OrderBookResponse>
+  pub async fn fetch_depth_with_limit<S, L>(&self, symbol: S, limit: L) -> Result<OrderBookResponse>
   where
     S: Into<String>,
     L: Into<u16>,

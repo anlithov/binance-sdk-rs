@@ -9,17 +9,19 @@ impl Market {
   /// Get compressed, aggregate Recent 24h trades.
   ///
   /// LIMIT 500
-  pub async fn agg_trades_recent<S>(&self, symbol: S) -> Result<Vec<AggregatedTradeResponse>>
+  pub async fn list_agg_trades_recent<S>(&self, symbol: S) -> Result<Vec<AggregatedTradeResponse>>
   where
     S: Into<String>,
   {
-    self.agg_trades_custom(symbol, None, None, None, None).await
+    self
+      .list_agg_trades_custom(symbol, None, None, None, None)
+      .await
   }
 
   /// Get compressed, aggregate Recent 24h trades.
   ///
   /// LIMIT 500
-  pub async fn agg_trades_from_id<S, I>(
+  pub async fn list_agg_trades_from_id<S, I>(
     &self,
     symbol: S,
     from_id: I,
@@ -29,14 +31,14 @@ impl Market {
     I: Into<u64>,
   {
     self
-      .agg_trades_custom(symbol, from_id.into(), None, None, None)
+      .list_agg_trades_custom(symbol, from_id.into(), None, None, None)
       .await
   }
 
   /// Get compressed, aggregate Recent 24h trades.
   ///
   /// LIMIT 500
-  pub async fn agg_trades_from_time<S, STR>(
+  pub async fn list_agg_trades_from_time<S, STR>(
     &self,
     symbol: S,
     start_time: STR,
@@ -46,14 +48,14 @@ impl Market {
     STR: Into<u64>,
   {
     self
-      .agg_trades_custom(symbol, None, start_time.into(), None, None)
+      .list_agg_trades_custom(symbol, None, start_time.into(), None, None)
       .await
   }
 
   /// Get compressed, aggregate Recent 24h trades.
   ///
   /// LIMIT 500
-  pub async fn agg_trades_by_timeframe<S, STR, END>(
+  pub async fn list_agg_trades_by_timeframe<S, STR, END>(
     &self,
     symbol: S,
     start_time: STR,
@@ -65,7 +67,7 @@ impl Market {
     END: Into<u64>,
   {
     self
-      .agg_trades_custom(symbol, None, start_time.into(), end_time.into(), None)
+      .list_agg_trades_custom(symbol, None, start_time.into(), end_time.into(), None)
       .await
   }
 
@@ -77,7 +79,7 @@ impl Market {
   /// - q = '0' // qty
   /// - f = -1 // ﬁrst_trade_id
   /// - l = -1 // last_trade_id
-  pub async fn agg_trades_custom<S, I, STR, END, L>(
+  pub async fn list_agg_trades_custom<S, I, STR, END, L>(
     &self,
     symbol: S,
     from_id: I,

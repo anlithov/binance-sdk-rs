@@ -105,13 +105,6 @@ impl TryFrom<&Vec<Value>> for KlineSummaryResponse {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-#[serde(rename_all = "camelCase")]
-#[serde(untagged)]
-pub enum TickerPriceMultiResponse {
-  AllPrices(Vec<TickerPriceResponse>),
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct TickerPriceResponse {
   pub symbol: String,
   #[serde(with = "string_or_float")]

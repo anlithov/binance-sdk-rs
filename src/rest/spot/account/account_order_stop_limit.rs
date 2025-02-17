@@ -10,7 +10,7 @@ use anyhow::Result;
 impl Account {
   /// Create a stop limit buy order for the given symbol, price and stop price.
   /// Returning a `Transaction` value with the same parameters sent on the order.
-  pub async fn stop_limit_buy_order<S, F, PR, SPR>(
+  pub async fn place_stop_limit_buy_order<S, F, PR, SPR>(
     &self,
     symbol: S,
     qty: F,
@@ -25,7 +25,7 @@ impl Account {
     SPR: Into<f64>,
   {
     self
-      .stop_limit_order(
+      .place_stop_limit_order(
         symbol,
         qty,
         price,
@@ -40,7 +40,7 @@ impl Account {
   /// Returning a `Transaction` value with the same parameters sent on the order.
   ///
   /// This order is sandboxed: it is validated, but not sent to the matching engine.
-  pub async fn test_stop_limit_buy_order<S, F, PR, SPR>(
+  pub async fn test_здфсу_stop_limit_buy_order<S, F, PR, SPR>(
     &self,
     symbol: S,
     qty: F,
@@ -55,7 +55,7 @@ impl Account {
     SPR: Into<f64>,
   {
     self
-      .test_stop_limit_order(
+      .test_place_stop_limit_order(
         symbol,
         qty,
         price,
@@ -68,7 +68,7 @@ impl Account {
 
   /// Create a stop limit sell order for the given symbol, price and stop price.
   /// Returning a `Transaction` value with the same parameters sent on the order.
-  pub async fn stop_limit_sell_order<S, F, PR, SPR>(
+  pub async fn place_stop_limit_sell_order<S, F, PR, SPR>(
     &self,
     symbol: S,
     qty: F,
@@ -83,7 +83,7 @@ impl Account {
     SPR: Into<f64>,
   {
     self
-      .stop_limit_order(
+      .place_stop_limit_order(
         symbol,
         qty,
         price,
@@ -98,7 +98,7 @@ impl Account {
   /// Returning a `Transaction` value with the same parameters sent on the order.
   ///
   /// This order is sandboxed: it is validated, but not sent to the matching engine.
-  pub async fn test_stop_limit_sell_order<S, F, PR, SPR>(
+  pub async fn test_place_stop_limit_sell_order<S, F, PR, SPR>(
     &self,
     symbol: S,
     qty: F,
@@ -113,7 +113,7 @@ impl Account {
     SPR: Into<f64>,
   {
     self
-      .test_stop_limit_order(
+      .test_place_stop_limit_order(
         symbol,
         qty,
         price,
@@ -128,7 +128,7 @@ impl Account {
   /// Returning a `Transaction` value with the same parameters sent on the order.
   ///
   /// This order is sandboxed: it is validated, but not sent to the matching engine.
-  async fn stop_limit_order<S, Q, PR, SPR>(
+  async fn place_stop_limit_order<S, Q, PR, SPR>(
     &self,
     symbol: S,
     qty: Q,
@@ -167,7 +167,7 @@ impl Account {
   /// Returning a `Transaction` value with the same parameters sent on the order.
   ///
   /// This order is sandboxed: it is validated, but not sent to the matching engine.
-  async fn test_stop_limit_order<S, Q, PR, SPR>(
+  async fn test_place_stop_limit_order<S, Q, PR, SPR>(
     &self,
     symbol: S,
     qty: Q,

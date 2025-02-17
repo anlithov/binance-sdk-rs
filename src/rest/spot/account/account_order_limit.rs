@@ -10,7 +10,7 @@ use anyhow::Result;
 // Limit orders
 impl Account {
   /// Place a LIMIT order - BUY
-  pub async fn limit_buy<S, Q, PR>(
+  pub async fn place_limit_buy_order<S, Q, PR>(
     &self,
     symbol: S,
     qty: Q,
@@ -21,13 +21,15 @@ impl Account {
     Q: Into<f64>,
     PR: Into<f64>,
   {
-    self.limit_order(symbol, qty, OrderSide::Buy, price).await
+    self
+      .place_limit_order(symbol, qty, OrderSide::Buy, price)
+      .await
   }
 
   /// Place a LIMIT test order - BUY
   ///
   /// This order is sandboxed: it is validated, but not sent to the matching engine.
-  pub async fn test_limit_buy<S, Q, PR>(
+  pub async fn test_place_limit_buy_order<S, Q, PR>(
     &self,
     symbol: S,
     qty: Q,
@@ -39,12 +41,12 @@ impl Account {
     PR: Into<f64>,
   {
     self
-      .test_limit_order(symbol, qty, OrderSide::Buy, price)
+      .test_place_limit_order(symbol, qty, OrderSide::Buy, price)
       .await
   }
 
   /// Place a LIMIT order - SELL
-  pub async fn limit_sell<S, Q, PR>(
+  pub async fn place_limit_sell_order<S, Q, PR>(
     &self,
     symbol: S,
     qty: Q,
@@ -55,13 +57,15 @@ impl Account {
     Q: Into<f64>,
     PR: Into<f64>,
   {
-    self.limit_order(symbol, qty, OrderSide::Sell, price).await
+    self
+      .place_limit_order(symbol, qty, OrderSide::Sell, price)
+      .await
   }
 
   /// Place a LIMIT test order - SELL
   ///
   /// This order is sandboxed: it is validated, but not sent to the matching engine.
-  pub async fn test_limit_sell<S, Q, PR>(
+  pub async fn test_place_limit_sell_order<S, Q, PR>(
     &self,
     symbol: S,
     qty: Q,
@@ -73,11 +77,11 @@ impl Account {
     PR: Into<f64>,
   {
     self
-      .test_limit_order(symbol, qty, OrderSide::Sell, price)
+      .test_place_limit_order(symbol, qty, OrderSide::Sell, price)
       .await
   }
 
-  async fn limit_order<S, Q, PR>(
+  async fn place_limit_order<S, Q, PR>(
     &self,
     symbol: S,
     qty: Q,
@@ -108,7 +112,7 @@ impl Account {
       .await
   }
 
-  async fn test_limit_order<S, Q, PR>(
+  async fn test_place_limit_order<S, Q, PR>(
     &self,
     symbol: S,
     qty: Q,
