@@ -1,5 +1,5 @@
 pub enum API {
-  Spot(Spot),
+  SpotV3(SpotV3),
   Savings(Savings),
   Futures(Futures),
 }
@@ -7,7 +7,7 @@ pub enum API {
 /// Endpoint for production and test orders.
 ///
 /// Orders issued to test are validated, but not sent into the matching engine.
-pub enum Spot {
+pub enum SpotV3 {
   Ping,
   Time,
   ExchangeInfo,
@@ -89,34 +89,34 @@ pub enum Futures {
 impl AsRef<str> for API {
   fn as_ref(&self) -> &str {
     match self {
-      API::Spot(route) => match route {
-        Spot::Ping => "/api/v3/ping",
-        Spot::Time => "/api/v3/time",
-        Spot::ExchangeInfo => "/api/v3/exchangeInfo",
-        Spot::Depth => "/api/v3/depth",
-        Spot::Trades => "/api/v3/trades",
-        Spot::HistoricalTrades => "/api/v3/historicalTrades",
-        Spot::AggTrades => "/api/v3/aggTrades",
-        Spot::Klines => "/api/v3/klines",
-        Spot::AvgPrice => "/api/v3/avgPrice",
-        Spot::Ticker24hr => "/api/v3/ticker/24hr",
-        Spot::Price => "/api/v3/ticker/price",
-        Spot::BookTicker => "/api/v3/ticker/bookTicker",
-        Spot::Order => "/api/v3/order",
-        Spot::OrderTest => "/api/v3/order/test",
-        Spot::OpenOrders => "/api/v3/openOrders",
-        Spot::AllOrders => "/api/v3/allOrders",
-        Spot::Oco => "/api/v3/order/oco",
-        Spot::OrderList => "/api/v3/orderList",
-        Spot::AllOrderList => "/api/v3/allOrderList",
-        Spot::OpenOrderList => "/api/v3/openOrderList",
-        Spot::Account => "/api/v3/account",
-        Spot::MyTrades => "/api/v3/myTrades",
-        Spot::RateLimitOrder => "/api/v3/rateLimit/order",
-        Spot::MyPreventedMatches => "/api/v3/myPreventedMatches",
-        Spot::MyAllocations => "/api/v3/myAllocations",
-        Spot::AccountCommissions => "/api/v3/account/commission",
-        Spot::UserDataStream => "/api/v3/userDataStream",
+      API::SpotV3(route) => match route {
+        SpotV3::Ping => "/api/v3/ping",
+        SpotV3::Time => "/api/v3/time",
+        SpotV3::ExchangeInfo => "/api/v3/exchangeInfo",
+        SpotV3::Depth => "/api/v3/depth",
+        SpotV3::Trades => "/api/v3/trades",
+        SpotV3::HistoricalTrades => "/api/v3/historicalTrades",
+        SpotV3::AggTrades => "/api/v3/aggTrades",
+        SpotV3::Klines => "/api/v3/klines",
+        SpotV3::AvgPrice => "/api/v3/avgPrice",
+        SpotV3::Ticker24hr => "/api/v3/ticker/24hr",
+        SpotV3::Price => "/api/v3/ticker/price",
+        SpotV3::BookTicker => "/api/v3/ticker/bookTicker",
+        SpotV3::Order => "/api/v3/order",
+        SpotV3::OrderTest => "/api/v3/order/test",
+        SpotV3::OpenOrders => "/api/v3/openOrders",
+        SpotV3::AllOrders => "/api/v3/allOrders",
+        SpotV3::Oco => "/api/v3/order/oco",
+        SpotV3::OrderList => "/api/v3/orderList",
+        SpotV3::AllOrderList => "/api/v3/allOrderList",
+        SpotV3::OpenOrderList => "/api/v3/openOrderList",
+        SpotV3::Account => "/api/v3/account_v3",
+        SpotV3::MyTrades => "/api/v3/myTrades",
+        SpotV3::RateLimitOrder => "/api/v3/rateLimit/order",
+        SpotV3::MyPreventedMatches => "/api/v3/myPreventedMatches",
+        SpotV3::MyAllocations => "/api/v3/myAllocations",
+        SpotV3::AccountCommissions => "/api/v3/account_v3/commission",
+        SpotV3::UserDataStream => "/api/v3/userDataStream",
       },
       API::Savings(route) => match route {
         Savings::AllCoins => "/savings/v1/capital/config/getall",
@@ -160,7 +160,7 @@ impl AsRef<str> for API {
         Futures::ChangeInitialLeverage => "/futures/v1/leverage",
         Futures::MarginType => "/futures/v1/marginType",
         Futures::PositionMargin => "/futures/v1/positionMargin",
-        Futures::Account => "/futures/v2/account",
+        Futures::Account => "/futures/v2/account_v3",
         Futures::OpenOrders => "/futures/v1/openOrders",
         Futures::UserDataStream => "/futures/v1/listenKey",
         Futures::Income => "/futures/v1/income",

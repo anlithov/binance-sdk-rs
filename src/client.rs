@@ -1,6 +1,10 @@
 use crate::config::Config;
 use crate::rest::inner_client::InnerClient;
-use crate::rest::spot::account::Account;
+use crate::rest::spot::account_v3::SpotAccountManagerV3;
+use crate::rest::spot::general_v3::GeneralManagerV3;
+use crate::rest::spot::market_v3::SpotMarketV3Manager;
+use crate::rest::spot::trade_v3::SpotTradeV3Manager;
+use crate::rest::spot::user_stream_v3::SpotUserStreamManagerV3;
 
 /// A trait that all modules must implement to be a Binance API client module.
 ///
@@ -33,19 +37,29 @@ pub trait Binance {
   fn new_with_config(api_key: Option<String>, secret_key: Option<String>, config: &Config) -> Self;
 }
 
-impl Binance for Account {
-  fn new(api_key: Option<String>, secret_key: Option<String>) -> Account {
-    Self::new_with_config(api_key, secret_key, &Config::default())
-  }
+macro_rules! impl_binance_for {
+  ($typename:ident) => {
+    impl Binance for $typename {
+      fn new(api_key: Option<String>, secret_key: Option<String>) -> Self {
+        Self::new_with_config(api_key, secret_key, &Config::default())
+      }
 
-  fn new_with_config(
-    api_key: Option<String>,
-    secret_key: Option<String>,
-    config: &Config,
-  ) -> Account {
-    Account {
-      client: InnerClient::new(api_key, secret_key, config.rest_api_host.clone()),
-      recv_window: config.recv_window,
+      fn new_with_config(
+        api_key: Option<String>,
+        secret_key: Option<String>,
+        config: &Config,
+      ) -> Self {
+        $typename {
+          client: InnerClient::new(api_key, secret_key, config.rest_api_host.clone()),
+          recv_window: config.recv_window,
+        }
+      }
     }
-  }
+  };
 }
+
+impl_binance_for!(SpotAccountManagerV3);
+impl_binance_for!(SpotTradeV3Manager);
+impl_binance_for!(SpotMarketV3Manager);
+impl_binance_for!(GeneralManagerV3);
+impl_binance_for!(SpotUserStreamManagerV3);

@@ -11,5 +11,6 @@ mod config;
 mod errors;
 pub mod model;
 pub mod rest;
+pub(crate) mod serde_helpers;
 mod util;
 pub mod websocket;

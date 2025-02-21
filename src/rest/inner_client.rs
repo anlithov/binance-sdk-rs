@@ -35,9 +35,9 @@ impl InnerClient {
   pub async fn get_signed<T: DeserializeOwned>(
     &self,
     endpoint: API,
-    request: Option<String>,
+    query: Option<String>,
   ) -> Result<T> {
-    let url = self.build_signed_url(endpoint, request);
+    let url = self.build_signed_url(endpoint, query);
     let http_client = &self.http_client;
 
     let response = http_client
@@ -49,12 +49,8 @@ impl InnerClient {
     self.handler(response).await
   }
 
-  pub async fn post_signed<T: DeserializeOwned>(
-    &self,
-    endpoint: API,
-    request: String,
-  ) -> Result<T> {
-    let url = self.build_signed_url(endpoint, Some(request));
+  pub async fn post_signed<T: DeserializeOwned>(&self, endpoint: API, query: String) -> Result<T> {
+    let url = self.build_signed_url(endpoint, Some(query));
     let http_client = &self.http_client;
     let response = http_client
       .post(url.as_str())
@@ -68,9 +64,9 @@ impl InnerClient {
   pub async fn delete_signed<T: DeserializeOwned>(
     &self,
     endpoint: API,
-    request: Option<String>,
+    query: Option<String>,
   ) -> Result<T> {
-    let url = self.build_signed_url(endpoint, request);
+    let url = self.build_signed_url(endpoint, query);
     let http_client = &self.http_client;
     let response = http_client
       .delete(url.as_str())
@@ -81,19 +77,18 @@ impl InnerClient {
     self.handler(response).await
   }
 
-  pub async fn get<T: DeserializeOwned>(
-    &self,
-    endpoint: API,
-    request: Option<String>,
-  ) -> Result<T> {
+  pub async fn get<T: DeserializeOwned>(&self, endpoint: API, query: Option<String>) -> Result<T> {
     let mut url = self.build_url(endpoint);
-    if let Some(request) = request {
+    if let Some(request) = query {
       if !request.is_empty() {
         url.push_str(format!("?{}", request).as_str());
       }
     }
 
     let http_client = &self.http_client;
+
+    let response3 = http_client.get(url.as_str()).send().await?;
+    print!("{:?}", response3.text().await?);
     let response = http_client.get(url.as_str()).send().await?;
 
     self.handler(response).await
@@ -142,19 +137,19 @@ impl InnerClient {
     self.handler(response).await
   }
 
-  fn build_signed_url(&self, endpoint: API, params: Option<String>) -> String {
+  fn build_signed_url(&self, endpoint: API, query: Option<String>) -> String {
     let mut signed_key = HmacSha256::new_from_slice(self.secret_key.as_bytes()).unwrap();
-    let query;
-    if let Some(params) = params {
+    let signed_query;
+    if let Some(params) = query {
       signed_key.update(params.as_bytes());
       let signature = hex_encode(signed_key.finalize().into_bytes());
-      query = format!("{}&signature={}", params, signature);
+      signed_query = format!("{}&signature={}", params, signature);
     } else {
       let signature = hex_encode(signed_key.finalize().into_bytes());
-      query = format!("&signature={}", signature);
+      signed_query = format!("&signature={}", signature);
     }
 
-    format!("{}{}?{}", self.server_host, endpoint.as_ref(), query)
+    format!("{}{}?{}", self.server_host, endpoint.as_ref(), signed_query)
   }
 
   fn build_url(&self, endpoint: API) -> String {

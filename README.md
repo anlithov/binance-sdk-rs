@@ -17,7 +17,7 @@ Add this to your Cargo.toml
 
 ```toml
 [dependencies]
-binance-sdk-rs = 0.1
+binance-sdk-rs = 0.2
 ```
 
 Examples located in the examples folder.
