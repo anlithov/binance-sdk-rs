@@ -1,10 +1,10 @@
 use crate::config::Config;
 use crate::rest::inner_client::InnerClient;
-use crate::rest::spot::account_v3::SpotAccountManagerV3;
-use crate::rest::spot::general_v3::GeneralManagerV3;
-use crate::rest::spot::market_v3::SpotMarketV3Manager;
-use crate::rest::spot::trade_v3::SpotTradeV3Manager;
-use crate::rest::spot::user_stream_v3::SpotUserStreamManagerV3;
+use crate::rest::spot::v3::account::SpotAccountManagerV3;
+use crate::rest::spot::v3::general::GeneralManagerV3;
+use crate::rest::spot::v3::market::SpotMarketV3Manager;
+use crate::rest::spot::v3::trade::SpotTradeV3Manager;
+use crate::rest::spot::v3::user_stream::SpotUserStreamManagerV3;
 
 /// A trait that all modules must implement to be a Binance API client module.
 ///

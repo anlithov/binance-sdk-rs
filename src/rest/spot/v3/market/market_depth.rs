@@ -1,6 +1,6 @@
 use super::SpotMarketV3Manager;
 use crate::rest::endpoints::{SpotV3, API};
-use crate::rest::spot::market_v3::responses::OrderBookResponse;
+use crate::rest::spot::v3::market::responses::OrderBookResponse;
 use crate::util::build_query;
 use anyhow::Result;
 use std::collections::BTreeMap;

@@ -1,4 +1,4 @@
-use crate::rest::spot::market_v3::enums::KlineInterval;
+use crate::rest::spot::v3::market::enums::KlineInterval;
 use std::collections::BTreeMap;
 
 #[derive(Default)]

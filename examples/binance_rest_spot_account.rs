@@ -1,6 +1,6 @@
 use binance::client::*;
-use binance::rest::spot::account_v3::*;
-use binance::rest::spot::trade_v3::SpotTradeV3Manager;
+use binance::rest::spot::v3::account::*;
+use binance::rest::spot::v3::trade::SpotTradeV3Manager;
 use dotenvy::dotenv;
 use std::env;
 
@@ -29,21 +29,21 @@ async fn account_balances_and_info_example() {
   let account_v3: SpotAccountManagerV3 = Binance::new(api_key, secret_key);
 
   handle_result!(
-    // Get current account_v3 information.
+    // Get current account information.
     account_v3.fetch_info_summary().await
   );
   handle_result!(
-    // Get current ALL non-zero account_v3 balances.
+    // Get current ALL non-zero account balances.
     // *Only free or locked > 0
     account_v3.list_balances().await
   );
   handle_result!(
-    // Get current FREE account_v3 balances.
+    // Get current FREE account balances.
     // *Only free > 0
     account_v3.list_balances_free().await
   );
   handle_result!(
-    // Get current LOCKED account_v3 balances.
+    // Get current LOCKED account balances.
     // *Only locked > 0
     account_v3.list_balances_locked().await
   );

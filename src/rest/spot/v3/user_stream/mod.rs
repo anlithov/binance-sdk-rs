@@ -1,5 +1,5 @@
 use crate::rest::endpoints::{SpotV3, API};
-use crate::rest::spot::user_stream_v3::model::{Success, UserDataStream};
+use crate::rest::spot::v3::user_stream::model::{Success, UserDataStream};
 use anyhow::Result;
 
 use crate::rest::inner_client::InnerClient;

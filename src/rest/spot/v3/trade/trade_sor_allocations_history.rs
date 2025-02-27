@@ -1,6 +1,6 @@
 use super::SpotTradeV3Manager;
 use crate::rest::endpoints::{SpotV3, API};
-use crate::rest::spot::trade_v3::responses::TradeRecordResponse;
+use crate::rest::spot::v3::trade::responses::TradeRecordResponse;
 use crate::util::{build_signed_query, is_start_time_valid};
 use anyhow::{bail, Result};
 use std::collections::BTreeMap;
@@ -76,7 +76,7 @@ impl SpotTradeV3Manager {
       .await
   }
 
-  /// Read trade_v3 history starting from UNIX/timestamp (sec/ms from EPOCH)
+  /// Read trade history starting from UNIX/timestamp (sec/ms from EPOCH)
   ///
   /// e.g. 1739401957098/1739401957
   /// LIMIT - 500 (default)

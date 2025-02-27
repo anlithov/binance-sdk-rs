@@ -74,7 +74,7 @@ impl SpotMarketV3Manager {
   /// Get compressed, aggregate trades. Trades that fill at the time, from the same order,
   /// with the same price will have the quantity aggregated.
   /// - If fromId, startTime, and endTime are not sent, the most recent aggregate trades will be returned.
-  /// - Note that if a trade_v3 has the following values, this was a duplicate aggregate trade_v3 and marked as invalid:
+  /// - Note that if a trade has the following values, this was a duplicate aggregate trade and marked as invalid:
   /// - p = '0' // price
   /// - q = '0' // qty
   /// - f = -1 // ﬁrst_trade_id

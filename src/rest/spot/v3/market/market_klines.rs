@@ -1,8 +1,8 @@
 use super::SpotMarketV3Manager;
 use crate::rest::endpoints::{SpotV3, API};
-use crate::rest::spot::market_v3::enums::KlineInterval;
-use crate::rest::spot::market_v3::requests::KlinesRequest;
-use crate::rest::spot::market_v3::responses::KlineSummaryResponse;
+use crate::rest::spot::v3::market::enums::KlineInterval;
+use crate::rest::spot::v3::market::requests::KlinesRequest;
+use crate::rest::spot::v3::market::responses::KlineSummaryResponse;
 use crate::util::build_query;
 use anyhow::Result;
 

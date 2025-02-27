@@ -1,7 +1,7 @@
 use crate::model::EmptyResponse;
 use crate::rest::endpoints::{SpotV3, API};
 use crate::rest::inner_client::InnerClient;
-use crate::rest::spot::general_v3::responses::ServerTimeResponse;
+use crate::rest::spot::v3::general::responses::ServerTimeResponse;
 use anyhow::Result;
 
 pub mod responses;

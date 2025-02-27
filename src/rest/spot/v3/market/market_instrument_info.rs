@@ -1,6 +1,6 @@
 use super::responses::{GeneralExchangeInfoResponse, InstrumentInfoResponse};
 use crate::rest::endpoints::{SpotV3, API};
-use crate::rest::spot::market_v3::SpotMarketV3Manager;
+use crate::rest::spot::v3::market::SpotMarketV3Manager;
 use anyhow::{bail, Result};
 
 impl SpotMarketV3Manager {
