@@ -10,94 +10,71 @@ use anyhow::Result;
 // Market orders
 impl SpotTradeV3Manager {
   /// Place a MARKET order - BUY
-  pub async fn place_market_buy_order<S, Q, PR>(
+  pub async fn place_market_buy_order<S, Q>(
     &self,
     symbol: S,
     qty: Q,
-    price: PR,
   ) -> Result<OrderCreatedResponse>
   where
     S: Into<String>,
     Q: Into<f64>,
-    PR: Into<f64>,
   {
-    self
-      .place_market_order(symbol, OrderSide::Buy, qty, price)
-      .await
+    self.place_market_order(symbol, OrderSide::Buy, qty).await
   }
 
   /// Place a MARKET test order - BUY
   ///
   /// This order is sandboxed: it is validated, but not sent to the matching engine.
-  pub async fn test_place_market_buy_order<S, Q, PR>(
-    &self,
-    symbol: S,
-    qty: Q,
-    price: PR,
-  ) -> Result<EmptyResponse>
+  pub async fn test_place_market_buy_order<S, Q>(&self, symbol: S, qty: Q) -> Result<EmptyResponse>
   where
     S: Into<String>,
     Q: Into<f64>,
-    PR: Into<f64>,
   {
     self
-      .test_place_market_order(symbol, OrderSide::Buy, qty, price)
+      .test_place_market_order(symbol, OrderSide::Buy, qty)
       .await
   }
 
   /// Place a MARKET order - SELL
-  pub async fn place_market_sell_order<S, Q, PR>(
+  pub async fn place_market_sell_order<S, Q>(
     &self,
     symbol: S,
     qty: Q,
-    price: PR,
   ) -> Result<OrderCreatedResponse>
   where
     S: Into<String>,
     Q: Into<f64>,
-    PR: Into<f64>,
   {
-    self
-      .place_market_order(symbol, OrderSide::Sell, qty, price)
-      .await
+    self.place_market_order(symbol, OrderSide::Sell, qty).await
   }
 
   /// Place a MARKET test order - SELL
   ///
   /// This order is sandboxed: it is validated, but not sent to the matching engine.
-  pub async fn test_place_market_sell_order<S, Q, PR>(
-    &self,
-    symbol: S,
-    qty: Q,
-    price: PR,
-  ) -> Result<EmptyResponse>
+  pub async fn test_place_market_sell_order<S, Q>(&self, symbol: S, qty: Q) -> Result<EmptyResponse>
   where
     S: Into<String>,
     Q: Into<f64>,
-    PR: Into<f64>,
   {
     self
-      .test_place_market_order(symbol, OrderSide::Sell, qty, price)
+      .test_place_market_order(symbol, OrderSide::Sell, qty)
       .await
   }
 
-  async fn place_market_order<S, Q, PR>(
+  async fn place_market_order<S, Q>(
     &self,
     symbol: S,
     order_side: OrderSide,
     qty: Q,
-    price: PR,
   ) -> Result<OrderCreatedResponse>
   where
     S: Into<String>,
     Q: Into<f64>,
-    PR: Into<f64>,
   {
     let mut request = PlaceOrderRequest::default();
 
     request.symbol = symbol.into();
     request.qty = Some(qty.into());
-    request.price = Some(price.into());
     request.order_side = order_side;
     request.order_type = OrderType::Market;
     request.time_in_force = Some(TimeInForce::GTC);
@@ -111,23 +88,20 @@ impl SpotTradeV3Manager {
       .await
   }
 
-  async fn test_place_market_order<S, Q, PR>(
+  async fn test_place_market_order<S, Q>(
     &self,
     symbol: S,
     order_side: OrderSide,
     qty: Q,
-    price: PR,
   ) -> Result<EmptyResponse>
   where
     S: Into<String>,
     Q: Into<f64>,
-    PR: Into<f64>,
   {
     let mut request = PlaceOrderRequest::default();
 
     request.symbol = symbol.into();
     request.qty = Some(qty.into());
-    request.price = Some(price.into());
     request.order_side = order_side;
     request.order_type = OrderType::Market;
     request.time_in_force = Some(TimeInForce::GTC);
