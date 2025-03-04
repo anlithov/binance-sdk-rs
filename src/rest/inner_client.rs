@@ -7,7 +7,6 @@ use hmac::{Hmac, Mac};
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue, CONTENT_TYPE, USER_AGENT};
 use reqwest::{Client, Response, StatusCode};
 use serde::de::DeserializeOwned;
-use sha2::digest::KeyInit;
 use sha2::Sha256;
 
 type HmacSha256 = Hmac<Sha256>;
