@@ -56,20 +56,20 @@ enum InternalEvents {
   DepthOrderBookEvent(DepthOrderBookEvent),
 }
 
-pub struct WebSocketSpotStream<'a> {
+pub struct WebSocketSpotStream {
   /// Active subscriptions
   subscriptions: HashSet<String>,
   /// Event handler (can modify Arcs inside)
-  handler: Box<dyn FnMut(WebsocketSpotEvent) -> Result<()> + 'a + Send + Sync>,
+  handler: Box<dyn FnMut(WebsocketSpotEvent) -> Result<()> + Send + Sync + 'static>,
   /// WebSocket connection
   socket: Option<WebSocketStream<MaybeTlsStream<TcpStream>>>,
 }
 
-impl<'a> WebSocketSpotStream<'a> {
+impl WebSocketSpotStream {
   /// Construct a new WebSockets struct with callback
   pub fn new<Callback>(handler: Callback) -> Self
   where
-    Callback: FnMut(WebsocketSpotEvent) -> Result<()> + 'a + Send + Sync,
+    Callback: FnMut(WebsocketSpotEvent) -> Result<()> + Send + Sync + 'static,
   {
     Self {
       subscriptions: HashSet::new(),
