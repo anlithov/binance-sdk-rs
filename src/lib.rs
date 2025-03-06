@@ -13,4 +13,4 @@ pub mod model;
 pub mod rest;
 pub(crate) mod serde_helpers;
 mod util;
-pub mod websocket;
+pub mod websocket_stream;
