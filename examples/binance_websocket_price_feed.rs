@@ -11,7 +11,38 @@ use tokio::time::sleep;
 async fn main() -> Result<()> {
   dotenv().expect("Failed to read .env file");
 
+  last_price_for_one_symbol().await?;
   market_websocket().await?;
+
+  sleep(Duration::from_secs(30)).await;
+
+  Ok(())
+}
+
+async fn last_price_for_one_symbol() -> Result<()> {
+  let keep_running = Arc::new(AtomicBool::new(true));
+  let ticker_sub = "btcusdt@ticker";
+  let mut btcusdt: f64 = 0.0;
+
+  let mut web_socket = WebSocketSpotStream::new(move |event: WebsocketSpotEvent| {
+    if let WebsocketSpotEvent::DayTicker(ticker_event) = event {
+      btcusdt = ticker_event.average_price;
+      let btcusdt_close = ticker_event.current_close;
+      println!("{} - {}", btcusdt, btcusdt_close);
+    }
+
+    Ok(())
+  });
+
+  web_socket.subscribe(ticker_sub).await?; // check error
+  let keep_running_clone = keep_running.clone();
+  tokio::spawn(async move {
+    if let Err(e) = web_socket.event_loop(keep_running_clone).await {
+      eprintln!("WebSocket error: {}", e);
+    }
+  });
+
+  println!("disconnected");
 
   Ok(())
 }
@@ -19,32 +50,31 @@ async fn main() -> Result<()> {
 async fn market_websocket() -> Result<()> {
   let keep_running = Arc::new(AtomicBool::new(true)); // Used to control the event loop
   let btc_trade = "btcusdt@trade";
-  let mut web_socket: WebSocketSpotStream<'_> =
-    WebSocketSpotStream::new(|event: WebsocketSpotEvent| {
-      match event {
-        WebsocketSpotEvent::Trade(trade) => {
-          println!(
-            "Symbol: {}, price: {}, qty: {}",
-            trade.symbol, trade.price, trade.qty
-          );
-        }
-        WebsocketSpotEvent::DepthOrderBook(depth_order_book) => {
-          println!(
-            "Symbol: {}, Bids: {:?}, Ask: {:?}",
-            depth_order_book.symbol, depth_order_book.bids, depth_order_book.asks
-          );
-        }
-        WebsocketSpotEvent::OrderBook(order_book) => {
-          println!(
-            "last_update_id: {}, Bids: {:?}, Ask: {:?}",
-            order_book.last_update_id, order_book.bids, order_book.asks
-          );
-        }
-        _ => (),
-      };
+  let mut web_socket = WebSocketSpotStream::new(move |event: WebsocketSpotEvent| {
+    match event {
+      WebsocketSpotEvent::Trade(trade) => {
+        println!(
+          "Symbol: {}, price: {}, qty: {}",
+          trade.symbol, trade.price, trade.qty
+        );
+      }
+      WebsocketSpotEvent::DepthOrderBook(depth_order_book) => {
+        println!(
+          "Symbol: {}, Bids: {:?}, Ask: {:?}",
+          depth_order_book.symbol, depth_order_book.bids, depth_order_book.asks
+        );
+      }
+      WebsocketSpotEvent::OrderBook(order_book) => {
+        println!(
+          "last_update_id: {}, Bids: {:?}, Ask: {:?}",
+          order_book.last_update_id, order_book.bids, order_book.asks
+        );
+      }
+      _ => (),
+    };
 
-      Ok(())
-    });
+    Ok(())
+  });
 
   web_socket.subscribe(btc_trade).await?; // check error
   let keep_running_clone = keep_running.clone();

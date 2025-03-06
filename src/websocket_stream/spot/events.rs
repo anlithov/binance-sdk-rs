@@ -88,10 +88,12 @@ pub struct TradeEvent {
   pub symbol: String,
   #[serde(rename = "t")]
   pub trade_id: u64,
+  #[serde(with = "string_to_float")]
   #[serde(rename = "p")]
-  pub price: String,
+  pub price: f64,
+  #[serde(with = "string_to_float")]
   #[serde(rename = "q")]
-  pub qty: String,
+  pub qty: f64,
   #[serde(rename = "T")]
   pub trade_order_time: u64,
   #[serde(rename = "m")]
@@ -119,9 +121,11 @@ pub struct AggTradesEvent {
   #[serde(rename = "a")]
   pub aggregated_trade_id: u64,
   #[serde(rename = "p")]
-  pub price: String,
+  #[serde(with = "string_to_float")]
+  pub price: f64,
+  #[serde(with = "string_to_float")]
   #[serde(rename = "q")]
-  pub qty: String,
+  pub qty: f64,
   #[serde(rename = "f")]
   pub first_break_trade_id: u64,
   #[serde(rename = "l")]
@@ -292,26 +296,36 @@ pub struct DayTickerEvent {
   pub event_time: u64,
   #[serde(rename = "s")]
   pub symbol: String,
+  #[serde(with = "string_to_float")]
   #[serde(rename = "p")]
-  pub price_change: String,
+  pub price_change: f64,
+  #[serde(with = "string_to_float")]
   #[serde(rename = "P")]
-  pub price_change_percent: String,
+  pub price_change_percent: f64,
+  #[serde(with = "string_to_float")]
   #[serde(rename = "w")]
-  pub average_price: String,
+  pub average_price: f64,
+  #[serde(with = "string_to_float")]
   #[serde(rename = "x")]
-  pub prev_close: String,
+  pub prev_close: f64,
+  #[serde(with = "string_to_float")]
   #[serde(rename = "c")]
-  pub current_close: String,
+  pub current_close: f64,
+  #[serde(with = "string_to_float")]
   #[serde(rename = "Q")]
-  pub current_close_qty: String,
+  pub current_close_qty: f64,
+  #[serde(with = "string_to_float")]
   #[serde(rename = "b")]
-  pub best_bid: String,
+  pub best_bid: f64,
+  #[serde(with = "string_to_float")]
   #[serde(rename = "B")]
-  pub best_bid_qty: String,
+  pub best_bid_qty: f64,
   #[serde(rename = "a")]
-  pub best_ask: String,
+  #[serde(with = "string_to_float")]
+  pub best_ask: f64,
+  #[serde(with = "string_to_float")]
   #[serde(rename = "A")]
-  pub best_ask_qty: String,
+  pub best_ask_qty: f64,
   #[serde(rename = "o")]
   pub open: String,
   #[serde(rename = "h")]
@@ -343,20 +357,27 @@ pub struct WindowTickerEvent {
   pub event_time: u64,
   #[serde(rename = "s")]
   pub symbol: String,
+  #[serde(with = "string_to_float")]
   #[serde(rename = "p")]
-  pub price_change: String,
+  pub price_change: f64,
+  #[serde(with = "string_to_float")]
   #[serde(rename = "P")]
-  pub price_change_percent: String,
+  pub price_change_percent: f64,
+  #[serde(with = "string_to_float")]
   #[serde(rename = "o")]
-  pub open: String,
+  pub open: f64,
+  #[serde(with = "string_to_float")]
   #[serde(rename = "h")]
-  pub high: String,
+  pub high: f64,
+  #[serde(with = "string_to_float")]
   #[serde(rename = "l")]
-  pub low: String,
+  pub low: f64,
+  #[serde(with = "string_to_float")]
   #[serde(rename = "c")]
-  pub current_close: String,
+  pub current_close: f64,
+  #[serde(with = "string_to_float")]
   #[serde(rename = "w")]
-  pub average_price: String,
+  pub average_price: f64,
   #[serde(rename = "v")]
   pub volume: String,
   #[serde(rename = "q")]
