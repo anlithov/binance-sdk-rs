@@ -29,21 +29,21 @@ async fn account_balances_and_info_example() {
   let account_v3: SpotAccountManagerV3 = Binance::new(api_key, secret_key);
 
   handle_result!(
-    // Get current account information.
+    // Get current account_general information.
     account_v3.fetch_info_summary().await
   );
   handle_result!(
-    // Get current ALL non-zero account balances.
+    // Get current ALL non-zero account_general balances.
     // *Only free or locked > 0
     account_v3.list_balances().await
   );
   handle_result!(
-    // Get current FREE account balances.
+    // Get current FREE account_general balances.
     // *Only free > 0
     account_v3.list_balances_free().await
   );
   handle_result!(
-    // Get current LOCKED account balances.
+    // Get current LOCKED account_general balances.
     // *Only locked > 0
     account_v3.list_balances_locked().await
   );

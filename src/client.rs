@@ -1,4 +1,5 @@
 use crate::config::Config;
+use crate::rest::account_general::v1::AccountGeneralManagerV1;
 use crate::rest::inner_client::InnerClient;
 use crate::rest::spot::v3::account::SpotAccountManagerV3;
 use crate::rest::spot::v3::general::GeneralManagerV3;
@@ -63,3 +64,4 @@ impl_binance_for!(SpotTradeV3Manager);
 impl_binance_for!(SpotMarketV3Manager);
 impl_binance_for!(GeneralManagerV3);
 impl_binance_for!(SpotUserStreamManagerV3);
+impl_binance_for!(AccountGeneralManagerV1);

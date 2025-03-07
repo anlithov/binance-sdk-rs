@@ -8,7 +8,7 @@ use std::collections::BTreeMap;
 
 // Balances
 impl SpotAccountManagerV3 {
-  /// Get current account information.
+  /// Get current account_general information.
   pub async fn fetch_info_summary(&self) -> Result<AccountInformationResponse> {
     let request = build_signed_query(BTreeMap::new(), self.recv_window)?;
     self
@@ -17,7 +17,7 @@ impl SpotAccountManagerV3 {
       .await
   }
 
-  /// Get current ALL non-zero account balances.
+  /// Get current ALL non-zero account_general balances.
   /// *Only free or locked > 0
   pub async fn list_balances(&self) -> Result<Vec<AssetBalanceResponse>> {
     self.fetch_info_summary().await.map(|r| {
@@ -28,7 +28,7 @@ impl SpotAccountManagerV3 {
     })
   }
 
-  /// Get current FREE account balances.
+  /// Get current FREE account_general balances.
   /// *Only free > 0
   pub async fn list_balances_free(&self) -> Result<Vec<AssetBalanceResponse>> {
     self.fetch_info_summary().await.map(|r| {
@@ -39,7 +39,7 @@ impl SpotAccountManagerV3 {
     })
   }
 
-  /// Get current LOCKED account balances.
+  /// Get current LOCKED account_general balances.
   /// *Only locked > 0
   pub async fn list_balances_locked(&self) -> Result<Vec<AssetBalanceResponse>> {
     self.fetch_info_summary().await.map(|r| {

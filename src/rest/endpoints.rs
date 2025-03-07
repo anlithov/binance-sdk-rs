@@ -2,6 +2,7 @@ pub enum API {
   SpotV3(SpotV3),
   Savings(Savings),
   Futures(Futures),
+  AccountGeneral(AccountGeneral),
 }
 
 /// Endpoint for production and test orders.
@@ -86,6 +87,10 @@ pub enum Futures {
   Income,
 }
 
+pub enum AccountGeneral {
+  ApiRestrictions,
+}
+
 impl AsRef<str> for API {
   fn as_ref(&self) -> &str {
     match self {
@@ -110,12 +115,12 @@ impl AsRef<str> for API {
         SpotV3::OrderList => "/api/v3/orderList",
         SpotV3::AllOrderList => "/api/v3/allOrderList",
         SpotV3::OpenOrderList => "/api/v3/openOrderList",
-        SpotV3::Account => "/api/v3/account",
+        SpotV3::Account => "/api/v3/account_general",
         SpotV3::MyTrades => "/api/v3/myTrades",
         SpotV3::RateLimitOrder => "/api/v3/rateLimit/order",
         SpotV3::MyPreventedMatches => "/api/v3/myPreventedMatches",
         SpotV3::MyAllocations => "/api/v3/myAllocations",
-        SpotV3::AccountCommissions => "/api/v3/account/commission",
+        SpotV3::AccountCommissions => "/api/v3/account_general/commission",
         SpotV3::UserDataStream => "/api/v3/userDataStream",
       },
       API::Savings(route) => match route {
@@ -160,10 +165,13 @@ impl AsRef<str> for API {
         Futures::ChangeInitialLeverage => "/futures/v1/leverage",
         Futures::MarginType => "/futures/v1/marginType",
         Futures::PositionMargin => "/futures/v1/positionMargin",
-        Futures::Account => "/futures/v2/account",
+        Futures::Account => "/futures/v2/account_general",
         Futures::OpenOrders => "/futures/v1/openOrders",
         Futures::UserDataStream => "/futures/v1/listenKey",
         Futures::Income => "/futures/v1/income",
+      },
+      API::AccountGeneral(route) => match route {
+        AccountGeneral::ApiRestrictions => "/sapi/v1/account/apiRestrictions",
       },
     }
   }
