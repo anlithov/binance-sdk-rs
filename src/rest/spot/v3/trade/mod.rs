@@ -17,6 +17,6 @@ pub mod trade_stp_orders_info;
 
 #[derive(Clone)]
 pub struct SpotTradeV3Manager {
-  pub client: InnerClient,
-  pub recv_window: u64,
+  pub(crate) client: InnerClient,
+  pub(crate) recv_window: u64,
 }

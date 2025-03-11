@@ -77,7 +77,6 @@ impl SpotTradeV3Manager {
     request.qty = Some(qty.into());
     request.order_side = order_side;
     request.order_type = OrderType::Market;
-    request.time_in_force = Some(TimeInForce::GTC);
 
     let params_tree = request.build_params_tree();
     let query = build_signed_query(params_tree, self.recv_window)?;

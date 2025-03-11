@@ -1,7 +1,9 @@
 use super::responses::{GeneralExchangeInfoResponse, InstrumentInfoResponse};
 use crate::rest::endpoints::{SpotV3, API};
 use crate::rest::spot::v3::market::SpotMarketV3Manager;
-use anyhow::{bail, Result};
+use crate::util::build_query;
+use anyhow::Result;
+use std::collections::BTreeMap;
 
 impl SpotMarketV3Manager {
   /// Obtain exchange information.
@@ -28,17 +30,16 @@ impl SpotMarketV3Manager {
   where
     S: Into<String>,
   {
-    let upper_symbol = symbol.into().to_uppercase();
-    match self.list_instruments_info().await {
-      Ok(symbols) => {
-        for item in symbols {
-          if item.symbol == upper_symbol {
-            return Ok(item);
-          }
-        }
-        bail!("Symbol not found")
-      }
-      Err(e) => Err(e),
-    }
+    let mut parameters: BTreeMap<String, String> = BTreeMap::new();
+
+    parameters.insert("symbol".into(), symbol.into());
+
+    let request = build_query(parameters);
+
+    self
+      .client
+      .get::<GeneralExchangeInfoResponse>(API::SpotV3(SpotV3::ExchangeInfo), Some(request))
+      .await
+      .map(|r| r.symbols[0].clone())
   }
 }

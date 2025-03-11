@@ -11,8 +11,8 @@ create_enum_with_fmt!(OrderType, {
 });
 
 create_enum_with_fmt!(OrderSide, {
-  Buy => "Buy",
-  Sell => "Sell"
+  Buy => "BUY",
+  Sell => "SELL"
 });
 
 create_enum_with_fmt!(TimeInForce, {

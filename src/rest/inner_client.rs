@@ -50,10 +50,12 @@ impl InnerClient {
 
   pub async fn post_signed<T: DeserializeOwned>(&self, endpoint: API, query: String) -> Result<T> {
     let url = self.build_signed_url(endpoint, Some(query));
+
     let http_client = &self.http_client;
     let response = http_client
       .post(url.as_str())
       .headers(self.build_headers(true)?)
+      .body("".to_string())
       .send()
       .await?;
 
@@ -86,8 +88,6 @@ impl InnerClient {
 
     let http_client = &self.http_client;
 
-    let response3 = http_client.get(url.as_str()).send().await?;
-    print!("{:?}", response3.text().await?);
     let response = http_client.get(url.as_str()).send().await?;
 
     self.handler(response).await

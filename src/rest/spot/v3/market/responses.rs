@@ -149,7 +149,6 @@ pub struct InstrumentRateLimitIntervalResponse {
   pub interval: String,
   pub interval_num: u64,
   pub limit: u64,
-  pub count: u64,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

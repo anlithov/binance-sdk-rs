@@ -91,6 +91,7 @@ impl SpotTradeV3Manager {
     request.order_type = OrderType::Market;
 
     let params_tree = request.build_params_tree();
+
     let query = build_signed_query(params_tree, self.recv_window)?;
 
     self

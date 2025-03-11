@@ -7,6 +7,6 @@ pub mod account_trade_rate_limits;
 
 #[derive(Clone)]
 pub struct SpotAccountManagerV3 {
-  pub client: InnerClient,
-  pub recv_window: u64,
+  pub(crate) client: InnerClient,
+  pub(crate) recv_window: u64,
 }

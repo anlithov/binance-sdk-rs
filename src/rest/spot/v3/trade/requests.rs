@@ -37,7 +37,7 @@ impl PlaceOrderRequest {
       order_parameters.insert("quantity".into(), qty.to_string());
     }
     if let Some(quote_order_qty) = self.quote_order_qty {
-      order_parameters.insert("quantityOrderQty".into(), quote_order_qty.to_string());
+      order_parameters.insert("quoteOrderQty".into(), quote_order_qty.to_string());
     }
     if let Some(price) = self.price {
       order_parameters.insert("price".into(), price.to_string());

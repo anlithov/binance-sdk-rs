@@ -13,6 +13,6 @@ pub mod responses;
 
 #[derive(Clone)]
 pub struct SpotMarketV3Manager {
-  pub client: InnerClient,
-  pub recv_window: u64,
+  pub(crate) client: InnerClient,
+  pub(crate) recv_window: u64,
 }

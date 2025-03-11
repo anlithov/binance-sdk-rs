@@ -8,8 +8,8 @@ pub mod model;
 
 #[derive(Clone)]
 pub struct SpotUserStreamManagerV3 {
-  pub client: InnerClient,
-  pub recv_window: u64,
+  pub(crate) client: InnerClient,
+  pub(crate) recv_window: u64,
 }
 
 impl SpotUserStreamManagerV3 {
