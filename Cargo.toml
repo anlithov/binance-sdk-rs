@@ -1,6 +1,6 @@
 [package]
 name = "binance-sdk-rs"
-version = "0.3.6"
+version = "0.3.7"
 license = "MIT"
 authors = ["anlithov <anlithov@gmail.com>"]
 edition = "2024"

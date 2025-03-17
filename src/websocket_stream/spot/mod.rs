@@ -9,9 +9,10 @@ use futures_util::StreamExt;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::collections::HashSet;
-use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::Arc;
 use tokio::net::TcpStream;
+use tokio::sync::mpsc;
+use tokio::sync::mpsc::Receiver;
+use tokio::task::JoinHandle;
 use tokio_tungstenite::tungstenite::{Message, Utf8Bytes};
 use tokio_tungstenite::{connect_async, MaybeTlsStream, WebSocketStream};
 
@@ -56,7 +57,14 @@ enum InternalEvents {
   DepthOrderBookEvent(DepthOrderBookEvent),
 }
 
-pub struct WebSocketSpotStream {
+/// Command enum that the internal actor will handle
+enum Command {
+  Subscribe(String),
+  Unsubscribe(String),
+  Shutdown,
+}
+
+struct WebSocketActor {
   /// Active subscriptions
   subscriptions: HashSet<String>,
   /// Event handler (can modify Arcs inside)
@@ -65,7 +73,7 @@ pub struct WebSocketSpotStream {
   socket: Option<WebSocketStream<MaybeTlsStream<TcpStream>>>,
 }
 
-impl WebSocketSpotStream {
+impl WebSocketActor {
   /// Construct a new WebSockets struct with callback
   pub fn new<Callback>(handler: Callback) -> Self
   where
@@ -142,31 +150,68 @@ impl WebSocketSpotStream {
     Ok(())
   }
 
-  /// Main event loop (runs in a separate async task)
-  pub async fn event_loop(&mut self, running: Arc<AtomicBool>) -> Result<()> {
-    while running.load(Ordering::Relaxed) {
-      if let Some(socket) = &mut self.socket {
-        match socket.next().await {
-          Some(Ok(Message::Text(msg))) => {
-            self.handle_incoming_message(&msg)?;
+  async fn run(mut self, mut cmd_rx: Receiver<Command>) -> Result<()> {
+    let mut keep_running = true;
+
+    while keep_running {
+      tokio::select! {
+        command = cmd_rx.recv() => {
+          match command {
+            Some(Command::Subscribe(stream)) => {
+              self.subscribe(&stream).await?;
+            }
+            Some(Command::Unsubscribe(stream)) => {
+              self.unsubscribe(&stream).await?;
+            }
+            Some(Command::Shutdown) => {
+              // Exiting this loop will close the websocket and end the task
+              keep_running = false;
+            }
+            None => {
+              // The sender side was dropped, so just shutdown
+              keep_running = false;
+            }
+              }
+          },
+
+
+          // 2) Or read next WebSocket message (if connected)
+          next_message = async {
+          if let Some(socket) = &mut self.socket {
+            socket.next().await
+          } else {
+            // If no socket, sleep briefly so we don't busy-loop
+            tokio::time::sleep(std::time::Duration::from_millis(100)).await;
+            None // no message
           }
-          Some(Ok(Message::Ping(payload))) => {
-            socket.send(Message::Pong(payload)).await?;
+          }, if self.socket.is_some() => {
+          match next_message {
+            Some(Ok(Message::Text(msg))) => {
+              self.handle_incoming_message(&msg)?;
+            }
+            Some(Ok(Message::Ping(payload))) => {
+              if let Some(socket) = &mut self.socket {
+                socket.send(Message::Pong(payload)).await?;
+              }
+            }
+            Some(Ok(Message::Close(_))) => {
+              eprintln!("WebSocket disconnected. Attempting to reconnect or break?");
+              self.disconnect().await?;
+              // optionally attempt reconnection here, or just keep running
+            },
+            Some(Err(e)) => {
+                            eprintln!("WebSocket error: {:?}", e);
+                            self.disconnect().await?;
+                            // optionally attempt to reconnect
+                        }
+            _ => {}
           }
-          Some(Ok(Message::Close(_))) | None => {
-            eprintln!("WebSocket disconnected, exiting event loop.");
-            break;
           }
-          Some(Err(e)) => {
-            eprintln!("WebSocket error: {:?}", e);
-            break;
-          }
-          _ => {}
-        }
-      } else {
-        tokio::time::sleep(std::time::Duration::from_millis(100)).await;
       }
     }
+
+    // Final cleanup
+    self.disconnect().await?;
     Ok(())
   }
 
@@ -199,5 +244,79 @@ impl WebSocketSpotStream {
       (self.handler)(action)?;
     }
     Ok(())
+  }
+}
+
+pub struct WebSocketSpotStream {
+  command_tx: mpsc::Sender<Command>,
+  join_handle: JoinHandle<Result<()>>,
+}
+
+impl WebSocketSpotStream {
+  /// Construct and start background task immediately.
+  ///
+  /// - `handler` is the callback for incoming events.
+  pub fn new<Callback>(handler: Callback) -> Self
+  where
+    Callback: FnMut(WebsocketSpotEvent) -> Result<()> + Send + Sync + 'static,
+  {
+    // Create the command channel
+    let (tx, rx) = mpsc::channel(32);
+
+    // Build the actor
+    let actor = WebSocketActor::new(handler);
+
+    // Spawn the actor in a background task
+    let join_handle = tokio::spawn(async move {
+      let result = actor.run(rx).await;
+      if let Err(ref e) = result {
+        eprintln!("WebSocket actor error: {:?}", e);
+      }
+      result
+    });
+
+    // Return a handle that can be used to send commands to that actor
+    Self {
+      command_tx: tx,
+      join_handle,
+    }
+  }
+
+  /// Subscribe to a stream
+  pub async fn subscribe(&self, stream: &str) -> Result<()> {
+    self
+      .command_tx
+      .send(Command::Subscribe(stream.to_string()))
+      .await
+      .map_err(|_| anyhow::anyhow!("Actor task ended"))?;
+    Ok(())
+  }
+
+  /// Unsubscribe from a stream
+  pub async fn unsubscribe(&self, stream: &str) -> Result<()> {
+    self
+      .command_tx
+      .send(Command::Unsubscribe(stream.to_string()))
+      .await
+      .map_err(|_| anyhow::anyhow!("Actor task ended"))?;
+    Ok(())
+  }
+
+  /// Ask the actor to shut down. Optionally you can `await` the join handle after this.
+  pub async fn shutdown(&self) -> Result<()> {
+    self
+      .command_tx
+      .send(Command::Shutdown)
+      .await
+      .map_err(|_| anyhow::anyhow!("Actor task ended"))?;
+    Ok(())
+  }
+
+  /// If you want, you can provide a method to wait for the actor to finish.
+  pub async fn wait_for_end(self) -> Result<()> {
+    match self.join_handle.await {
+      Ok(r) => r,
+      Err(e) => Err(anyhow::anyhow!("Join error: {:?}", e)),
+    }
   }
 }

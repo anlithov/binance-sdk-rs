@@ -1,7 +1,7 @@
 use binance::client::*;
+use binance::rest::spot::v3::market::SpotMarketV3Manager;
 use binance::rest::spot::v3::market::enums::KlineInterval;
 use binance::rest::spot::v3::market::requests::KlinesRequest;
-use binance::rest::spot::v3::market::SpotMarketV3Manager;
 use dotenvy::dotenv;
 use std::env;
 

@@ -2,8 +2,6 @@ use anyhow::Result;
 use binance::websocket_stream::spot::events::WebsocketSpotEvent;
 use binance::websocket_stream::spot::WebSocketSpotStream;
 use dotenvy::dotenv;
-use std::sync::atomic::AtomicBool;
-use std::sync::Arc;
 use std::time::Duration;
 use tokio::time::sleep;
 
@@ -20,27 +18,22 @@ async fn main() -> Result<()> {
 }
 
 async fn last_price_for_one_symbol() -> Result<()> {
-  let keep_running = Arc::new(AtomicBool::new(true));
-  let ticker_sub = "btcusdt@ticker";
   let mut btcusdt: f64 = 0.0;
 
-  let mut web_socket = WebSocketSpotStream::new(move |event: WebsocketSpotEvent| {
+  let web_socket = WebSocketSpotStream::new(move |event: WebsocketSpotEvent| {
     if let WebsocketSpotEvent::DayTicker(ticker_event) = event {
       btcusdt = ticker_event.average_price;
       let btcusdt_close = ticker_event.current_close;
-      println!("{} - {}", btcusdt, btcusdt_close);
+      println!("{} - {} - {}", ticker_event.symbol, btcusdt, btcusdt_close);
     }
 
     Ok(())
   });
 
-  web_socket.subscribe(ticker_sub).await?; // check error
-  let keep_running_clone = keep_running.clone();
-  tokio::spawn(async move {
-    if let Err(e) = web_socket.event_loop(keep_running_clone).await {
-      eprintln!("WebSocket error: {}", e);
-    }
-  });
+  web_socket.subscribe("btcusdt@ticker").await?; // check error
+  web_socket.subscribe("ethusdt@ticker").await?;
+
+  tokio::time::sleep(Duration::from_secs(30)).await;
 
   println!("disconnected");
 
@@ -48,9 +41,8 @@ async fn last_price_for_one_symbol() -> Result<()> {
 }
 
 async fn market_websocket() -> Result<()> {
-  let keep_running = Arc::new(AtomicBool::new(true)); // Used to control the event loop
   let btc_trade = "btcusdt@trade";
-  let mut web_socket = WebSocketSpotStream::new(move |event: WebsocketSpotEvent| {
+  let web_socket = WebSocketSpotStream::new(move |event: WebsocketSpotEvent| {
     match event {
       WebsocketSpotEvent::Trade(trade) => {
         println!(
@@ -77,12 +69,7 @@ async fn market_websocket() -> Result<()> {
   });
 
   web_socket.subscribe(btc_trade).await?; // check error
-  let keep_running_clone = keep_running.clone();
-  tokio::spawn(async move {
-    if let Err(e) = web_socket.event_loop(keep_running_clone).await {
-      eprintln!("WebSocket error: {}", e);
-    }
-  });
+
   sleep(Duration::from_secs(30)).await;
 
   println!("disconnected");
