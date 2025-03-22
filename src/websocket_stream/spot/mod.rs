@@ -59,8 +59,8 @@ enum InternalEvents {
 
 /// Command enum that the internal actor will handle
 enum Command {
-  Subscribe(String),
-  Unsubscribe(String),
+  Subscribe(Vec<String>),
+  Unsubscribe(Vec<String>),
   Shutdown,
 }
 
@@ -87,16 +87,24 @@ impl WebSocketActor {
   }
 
   /// Subscribe to a stream (adds it dynamically)
-  pub async fn subscribe(&mut self, stream: &str) -> Result<()> {
-    let inserted = self.subscriptions.insert(stream.to_string());
-    if !inserted {
+  pub async fn subscribe(&mut self, streams: Vec<String>) -> Result<()> {
+    let mut new_streams: Vec<String> = vec![];
+
+    streams.iter().for_each(|x| {
+      let inserted = self.subscriptions.insert(x.clone().to_string());
+      if inserted {
+        return new_streams.push(x.to_string());
+      }
+    });
+
+    if new_streams.is_empty() {
       return Ok(());
     }
 
     if let Some(socket) = &mut self.socket {
       let msg = json!({
           "method": "SUBSCRIBE",
-          "params": [stream],
+          "params": new_streams,
           "id": 1
       })
       .to_string();
@@ -108,15 +116,24 @@ impl WebSocketActor {
   }
 
   /// Unsubscribe from a stream (removes dynamically)
-  pub async fn unsubscribe(&mut self, stream: &str) -> Result<()> {
-    let removed = self.subscriptions.remove(stream);
-    if !removed {
+  pub async fn unsubscribe(&mut self, streams: Vec<String>) -> Result<()> {
+    let mut remove_streams: Vec<String> = vec![];
+
+    streams.iter().for_each(|x| {
+      let removed = self.subscriptions.remove(&x.clone());
+      if removed {
+        return remove_streams.push(x.to_string());
+      }
+    });
+
+    if remove_streams.is_empty() {
       return Ok(());
     }
+
     if let Some(socket) = &mut self.socket {
       let msg = json!({
           "method": "UNSUBSCRIBE",
-          "params": [stream],
+          "params": remove_streams,
           "id": 1
       })
       .to_string();
@@ -158,10 +175,10 @@ impl WebSocketActor {
         command = cmd_rx.recv() => {
           match command {
             Some(Command::Subscribe(stream)) => {
-              self.subscribe(&stream).await?;
+              self.subscribe(stream).await?;
             }
-            Some(Command::Unsubscribe(stream)) => {
-              self.unsubscribe(&stream).await?;
+            Some(Command::Unsubscribe(streams)) => {
+              self.unsubscribe(streams).await?;
             }
             Some(Command::Shutdown) => {
               // Exiting this loop will close the websocket and end the task
@@ -283,20 +300,20 @@ impl WebSocketSpotStream {
   }
 
   /// Subscribe to a stream
-  pub async fn subscribe(&self, stream: &str) -> Result<()> {
+  pub async fn subscribe(&self, streams: Vec<String>) -> Result<()> {
     self
       .command_tx
-      .send(Command::Subscribe(stream.to_string()))
+      .send(Command::Subscribe(streams))
       .await
       .map_err(|_| anyhow::anyhow!("Actor task ended"))?;
     Ok(())
   }
 
   /// Unsubscribe from a stream
-  pub async fn unsubscribe(&self, stream: &str) -> Result<()> {
+  pub async fn unsubscribe(&self, streams: Vec<String>) -> Result<()> {
     self
       .command_tx
-      .send(Command::Unsubscribe(stream.to_string()))
+      .send(Command::Unsubscribe(streams))
       .await
       .map_err(|_| anyhow::anyhow!("Actor task ended"))?;
     Ok(())

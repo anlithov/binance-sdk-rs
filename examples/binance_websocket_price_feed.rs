@@ -30,10 +30,36 @@ async fn last_price_for_one_symbol() -> Result<()> {
     Ok(())
   });
 
-  web_socket.subscribe("btcusdt@ticker").await?; // check error
-  web_socket.subscribe("ethusdt@ticker").await?;
+  web_socket
+    .subscribe(vec![
+      "btcusdt@ticker".to_string(),
+      "solusdt@ticker".to_string(),
+    ])
+    .await?; // check error
+  web_socket
+    .subscribe(vec!["ethusdt@ticker".to_string()])
+    .await?;
+  web_socket
+    .subscribe(vec!["btcusdt@ticker".to_string()])
+    .await?;
 
-  tokio::time::sleep(Duration::from_secs(30)).await;
+  tokio::time::sleep(Duration::from_secs(10)).await;
+
+  web_socket
+    .unsubscribe(vec![
+      "btcusdt@ticker".to_string(),
+      "solusdt@ticker".to_string(),
+    ])
+    .await?;
+
+  web_socket
+    .unsubscribe(vec![
+      "btcusdt@ticker".to_string(),
+      "solusdt@ticker".to_string(),
+    ])
+    .await?;
+
+  tokio::time::sleep(Duration::from_secs(10)).await;
 
   println!("disconnected");
 
@@ -41,7 +67,7 @@ async fn last_price_for_one_symbol() -> Result<()> {
 }
 
 async fn market_websocket() -> Result<()> {
-  let btc_trade = "btcusdt@trade";
+  let btc_trade = vec!["btcusdt@trade".to_string()];
   let web_socket = WebSocketSpotStream::new(move |event: WebsocketSpotEvent| {
     match event {
       WebsocketSpotEvent::Trade(trade) => {
