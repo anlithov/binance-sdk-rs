@@ -1,6 +1,6 @@
 [package]
 name = "binance-sdk-rs"
-version = "0.3.9"
+version = "0.3.10"
 license = "MIT"
 authors = ["anlithov <anlithov@gmail.com>"]
 edition = "2024"
@@ -14,14 +14,14 @@ name = "binance"
 path = "src/lib.rs"
 
 [dependencies]
-serde = { version = "1.0.218", features = ["derive"] }
+serde = { version = "1.0.219", features = ["derive"] }
 serde_json = "1.0.140"
 reqwest = { version = "0.12.12", features = ["blocking", "json"] }
 hmac = "0.12.1"
 sha2 = "0.10.8"
 hex = "0.4.3"
 anyhow = '1.0.97'
-tokio = { version = "1.43.0", features = ['macros', 'rt-multi-thread'] }
+tokio = { version = "1.44.1", features = ['macros', 'rt-multi-thread'] }
 tokio-tungstenite = { version = "0.26.2", features = ["tokio-native-tls", "native-tls"] }
 futures-util = "0.3.31"
 
