@@ -18,3 +18,40 @@ create_enum_with_fmt!(KlineInterval, {
   Week1 => "1w",
   Month1 => "1M",
 });
+
+create_enum_with_fmt!(ExchangeSymbolPermission, {
+     Spot => "SPOT",
+   Margin => "MARGIN",
+Leveraged => "LEVERAGED",
+TrdGrp002 => "TRD_GRP_002",
+TrdGrp003 => "TRD_GRP_003",
+TrdGrp004 => "TRD_GRP_004",
+TrdGrp005 => "TRD_GRP_005",
+TrdGrp006 => "TRD_GRP_006",
+TrdGrp007 => "TRD_GRP_007",
+TrdGrp008 => "TRD_GRP_008",
+TrdGrp009 => "TRD_GRP_009",
+TrdGrp010 => "TRD_GRP_010",
+TrdGrp011 => "TRD_GRP_011",
+TrdGrp012 => "TRD_GRP_012",
+TrdGrp013 => "TRD_GRP_013",
+TrdGrp014 => "TRD_GRP_014",
+TrdGrp015 => "TRD_GRP_015",
+TrdGrp016 => "TRD_GRP_016",
+TrdGrp017 => "TRD_GRP_017",
+TrdGrp018 => "TRD_GRP_018",
+TrdGrp019 => "TRD_GRP_019",
+TrdGrp020 => "TRD_GRP_020",
+TrdGrp021 => "TRD_GRP_021",
+TrdGrp022 => "TRD_GRP_022",
+TrdGrp023 => "TRD_GRP_023",
+TrdGrp024 => "TRD_GRP_024",
+TrdGrp025 => "TRD_GRP_025",
+});
+
+create_enum_with_fmt!(ExchangeSymbolStatus, {
+   Trading => "TRADING",
+EndOfDay => "END_OF_DAY",
+      Halt => "HALT",
+     Break => "BREAK",
+});
