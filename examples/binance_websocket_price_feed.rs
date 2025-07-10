@@ -10,7 +10,7 @@ async fn main() -> Result<()> {
   dotenv().expect("Failed to read .env file");
 
   last_price_for_one_symbol().await?;
-  market_websocket().await?;
+  /*market_websocket().await?;*/
 
   sleep(Duration::from_secs(30)).await;
 
@@ -42,6 +42,9 @@ async fn last_price_for_one_symbol() -> Result<()> {
   web_socket
     .subscribe(vec!["btcusdt@ticker".to_string()])
     .await?;
+
+  let res = web_socket.list_subscriptions().await?;
+  println!("{:?}", res);
 
   tokio::time::sleep(Duration::from_secs(10)).await;
 

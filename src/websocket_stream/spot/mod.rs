@@ -10,8 +10,8 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::collections::HashSet;
 use tokio::net::TcpStream;
-use tokio::sync::mpsc;
 use tokio::sync::mpsc::Receiver;
+use tokio::sync::{mpsc, oneshot};
 use tokio::task::JoinHandle;
 use tokio_tungstenite::tungstenite::{Message, Utf8Bytes};
 use tokio_tungstenite::{connect_async, MaybeTlsStream, WebSocketStream};
@@ -61,7 +61,7 @@ enum InternalEvents {
 enum Command {
   Subscribe(Vec<String>),
   Unsubscribe(Vec<String>),
-  ListSubscriptions,
+  ListSubscriptions(oneshot::Sender<Vec<String>>),
   Shutdown,
 }
 
@@ -148,17 +148,8 @@ impl WebSocketActor {
   }
 
   /// Unsubscribe from a stream (removes dynamically)
-  pub async fn list_subscriptions(&mut self) -> Result<()> {
-    if let Some(socket) = &mut self.socket {
-      let msg = json!({
-          "method": "LIST_SUBSCRIPTIONS",
-          "id": 3
-      })
-      .to_string();
-      socket.send(Message::Text(Utf8Bytes::from(msg))).await?;
-    }
-
-    Ok(())
+  pub async fn list_subscriptions(&mut self) -> Result<Vec<String>> {
+    Ok(self.subscriptions.iter().cloned().collect())
   }
 
   /// Connects to Binance WebSocket API with current subscriptions
@@ -195,8 +186,9 @@ impl WebSocketActor {
             Some(Command::Unsubscribe(streams)) => {
               self.unsubscribe(streams).await?;
             },
-            Some(Command::ListSubscriptions) => {
-             self.list_subscriptions().await?;
+            Some(Command::ListSubscriptions(tx)) => {
+              let subscriptions = self.list_subscriptions().await?;
+              let _ = tx.send(subscriptions);
             }
             Some(Command::Shutdown) => {
               // Exiting this loop will close the websocket and end the task
@@ -338,13 +330,16 @@ impl WebSocketSpotStream {
   }
 
   /// Subscribe to a stream
-  pub async fn list_subscriptions(&self) -> Result<()> {
+  pub async fn list_subscriptions(&self) -> Result<Vec<String>> {
+    let (tx, rx) = oneshot::channel();
     self
       .command_tx
-      .send(Command::ListSubscriptions)
+      .send(Command::ListSubscriptions(tx))
       .await
       .map_err(|_| anyhow::anyhow!("Actor task ended"))?;
-    Ok(())
+
+    rx.await
+      .map_err(|_| anyhow::anyhow!("Actor task ended or response channel closed"))
   }
 
   /// Ask the actor to shut down. Optionally you can `await` the join handle after this.
