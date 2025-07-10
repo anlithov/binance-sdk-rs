@@ -61,6 +61,7 @@ enum InternalEvents {
 enum Command {
   Subscribe(Vec<String>),
   Unsubscribe(Vec<String>),
+  ListSubscriptions,
   Shutdown,
 }
 
@@ -134,7 +135,7 @@ impl WebSocketActor {
       let msg = json!({
           "method": "UNSUBSCRIBE",
           "params": remove_streams,
-          "id": 1
+          "id": 2
       })
       .to_string();
       socket.send(Message::Text(Utf8Bytes::from(msg))).await?;
@@ -143,6 +144,20 @@ impl WebSocketActor {
     if self.subscriptions.is_empty() {
       self.disconnect().await?;
     }
+    Ok(())
+  }
+
+  /// Unsubscribe from a stream (removes dynamically)
+  pub async fn list_subscriptions(&mut self) -> Result<()> {
+    if let Some(socket) = &mut self.socket {
+      let msg = json!({
+          "method": "LIST_SUBSCRIPTIONS",
+          "id": 3
+      })
+      .to_string();
+      socket.send(Message::Text(Utf8Bytes::from(msg))).await?;
+    }
+
     Ok(())
   }
 
@@ -179,6 +194,9 @@ impl WebSocketActor {
             }
             Some(Command::Unsubscribe(streams)) => {
               self.unsubscribe(streams).await?;
+            },
+            Some(Command::ListSubscriptions) => {
+             self.list_subscriptions().await?;
             }
             Some(Command::Shutdown) => {
               // Exiting this loop will close the websocket and end the task
@@ -314,6 +332,16 @@ impl WebSocketSpotStream {
     self
       .command_tx
       .send(Command::Unsubscribe(streams))
+      .await
+      .map_err(|_| anyhow::anyhow!("Actor task ended"))?;
+    Ok(())
+  }
+
+  /// Subscribe to a stream
+  pub async fn list_subscriptions(&self) -> Result<()> {
+    self
+      .command_tx
+      .send(Command::ListSubscriptions)
       .await
       .map_err(|_| anyhow::anyhow!("Actor task ended"))?;
     Ok(())
