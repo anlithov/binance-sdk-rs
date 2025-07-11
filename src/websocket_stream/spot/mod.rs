@@ -9,9 +9,10 @@ use futures_util::StreamExt;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::collections::HashSet;
+use std::sync::Arc;
 use tokio::net::TcpStream;
 use tokio::sync::mpsc::Receiver;
-use tokio::sync::{mpsc, oneshot};
+use tokio::sync::{mpsc, oneshot, Mutex};
 use tokio::task::JoinHandle;
 use tokio_tungstenite::tungstenite::{Message, Utf8Bytes};
 use tokio_tungstenite::{connect_async, MaybeTlsStream, WebSocketStream};
@@ -65,24 +66,24 @@ enum Command {
   Shutdown,
 }
 
+type WebSocketCallback = dyn FnMut(WebsocketSpotEvent) -> Result<()> + Send + Sync + 'static;
+type SharedWebSocketCallback = Arc<Mutex<Box<WebSocketCallback>>>;
+
 struct WebSocketActor {
   /// Active subscriptions
   subscriptions: HashSet<String>,
   /// Event handler (can modify Arcs inside)
-  handler: Box<dyn FnMut(WebsocketSpotEvent) -> Result<()> + Send + Sync + 'static>,
+  handler: SharedWebSocketCallback,
   /// WebSocket connection
   socket: Option<WebSocketStream<MaybeTlsStream<TcpStream>>>,
 }
 
 impl WebSocketActor {
   /// Construct a new WebSockets struct with callback
-  pub fn new<Callback>(handler: Callback) -> Self
-  where
-    Callback: FnMut(WebsocketSpotEvent) -> Result<()> + Send + Sync + 'static,
-  {
+  pub fn new(handler: SharedWebSocketCallback) -> Self {
     Self {
       subscriptions: HashSet::new(),
-      handler: Box::new(handler),
+      handler,
       socket: None,
     }
   }
@@ -214,7 +215,7 @@ impl WebSocketActor {
           }, if self.socket.is_some() => {
           match next_message {
             Some(Ok(Message::Text(msg))) => {
-              self.handle_incoming_message(&msg)?;
+              self.handle_incoming_message(&msg).await?;
             }
             Some(Ok(Message::Ping(payload))) => {
               if let Some(socket) = &mut self.socket {
@@ -243,11 +244,11 @@ impl WebSocketActor {
   }
 
   /// Processes incoming messages
-  fn handle_incoming_message(&mut self, msg: &str) -> Result<()> {
+  async fn handle_incoming_message(&mut self, msg: &str) -> Result<()> {
     let json: serde_json::Value = serde_json::from_str(msg)?;
 
     if let Some(data) = json.get("data") {
-      self.handle_incoming_message(&data.to_string())?;
+      Box::pin(self.handle_incoming_message(&data.to_string())).await?;
       return Ok(());
     }
 
@@ -268,7 +269,10 @@ impl WebSocketActor {
         InternalEvents::OrderBook(v) => WebsocketSpotEvent::OrderBook(v),
         InternalEvents::DepthOrderBookEvent(v) => WebsocketSpotEvent::DepthOrderBook(v),
       };
-      (self.handler)(action)?;
+      {
+        let mut handler = self.handler.lock().await;
+        (handler)(action)?;
+      }
     }
     Ok(())
   }
@@ -277,21 +281,20 @@ impl WebSocketActor {
 pub struct WebSocketSpotStream {
   command_tx: mpsc::Sender<Command>,
   join_handle: JoinHandle<Result<()>>,
+  callback: SharedWebSocketCallback,
 }
 
 impl WebSocketSpotStream {
   /// Construct and start background task immediately.
   ///
   /// - `handler` is the callback for incoming events.
-  pub fn new<Callback>(handler: Callback) -> Self
-  where
-    Callback: FnMut(WebsocketSpotEvent) -> Result<()> + Send + Sync + 'static,
-  {
+  /// Should be wrapped into Arc + Mutex + Box
+  pub fn new_with_shared_handler(handler: SharedWebSocketCallback) -> Self {
     // Create the command channel
     let (tx, rx) = mpsc::channel(32);
 
-    // Build the actor
-    let actor = WebSocketActor::new(handler);
+    // Create and start the actor with a boxed version of our handler
+    let actor = WebSocketActor::new(handler.clone());
 
     // Spawn the actor in a background task
     let join_handle = tokio::spawn(async move {
@@ -306,7 +309,18 @@ impl WebSocketSpotStream {
     Self {
       command_tx: tx,
       join_handle,
+      callback: handler,
     }
+  }
+
+  /// Construct and start background task immediately.
+  ///
+  /// - `handler` is the callback for incoming events.
+  pub fn new<Callback>(handler: Callback) -> Self
+  where
+    Callback: FnMut(WebsocketSpotEvent) -> Result<()> + Send + Sync + 'static,
+  {
+    Self::new_with_shared_handler(Arc::new(Mutex::new(Box::new(handler))))
   }
 
   /// Subscribe to a stream
@@ -358,5 +372,34 @@ impl WebSocketSpotStream {
       Ok(r) => r,
       Err(e) => Err(anyhow::anyhow!("Join error: {:?}", e)),
     }
+  }
+
+  /// Implementation that creates an entirely new WebSocketSpotStream instance
+  /// and replaces self with it.
+  pub async fn reconnect(&mut self) -> Result<()> {
+    // Step 1: Get current subscriptions before shutdown
+    let current_subscriptions = self.list_subscriptions().await.unwrap_or_else(|e| {
+      eprintln!("Warning: Could not retrieve current subscriptions: {}", e);
+      Vec::new()
+    });
+
+    // Step 2: Shutdown the current connection
+    if let Err(e) = self.shutdown().await {
+      eprintln!("Warning: Error shutting down existing connection: {}", e);
+      // Continue with reconnection attempt
+    }
+
+    // Create a new stream with our handler
+    let new_stream = WebSocketSpotStream::new_with_shared_handler(self.callback.clone());
+
+    // Step 3: Replace self with the new stream
+    *self = new_stream;
+
+    // Step 4: Resubscribe to all previously subscribed streams
+    if !current_subscriptions.is_empty() {
+      self.subscribe(current_subscriptions).await?;
+    }
+
+    Ok(())
   }
 }

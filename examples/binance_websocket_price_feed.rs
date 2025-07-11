@@ -20,7 +20,7 @@ async fn main() -> Result<()> {
 async fn last_price_for_one_symbol() -> Result<()> {
   let mut btcusdt: f64 = 0.0;
 
-  let web_socket = WebSocketSpotStream::new(move |event: WebsocketSpotEvent| {
+  let callback = move |event: WebsocketSpotEvent| {
     if let WebsocketSpotEvent::DayTicker(ticker_event) = event {
       btcusdt = ticker_event.average_price;
       let btcusdt_close = ticker_event.current_close;
@@ -28,8 +28,11 @@ async fn last_price_for_one_symbol() -> Result<()> {
     }
 
     Ok(())
-  });
+  };
 
+  let mut web_socket = WebSocketSpotStream::new(callback);
+
+  println!("[SUBSCRIB BTC + ETH]");
   web_socket
     .subscribe(vec![
       "btcusdt@ticker".to_string(),
@@ -39,32 +42,31 @@ async fn last_price_for_one_symbol() -> Result<()> {
   web_socket
     .subscribe(vec!["ethusdt@ticker".to_string()])
     .await?;
-  web_socket
-    .subscribe(vec!["btcusdt@ticker".to_string()])
-    .await?;
+  println!("[SUBSCRIBED BTC + ETH]");
 
+  tokio::time::sleep(Duration::from_secs(2)).await;
+
+  println!("[UNSUBSCRIBE BTCUSDT]");
+  web_socket
+    .unsubscribe(vec!["btcusdt@ticker".to_string()])
+    .await?;
+  println!("[UNSUBSCRIBED BTCUSDT]");
+
+  tokio::time::sleep(Duration::from_secs(2)).await;
+
+  println!("[LIST SUBSCRIPTIONS]");
   let res = web_socket.list_subscriptions().await?;
   println!("{:?}", res);
+  tokio::time::sleep(Duration::from_secs(5)).await;
+
+  // Use the reconnect method with a new handler
+  println!("[RECONNECTED]");
+  web_socket.reconnect().await?;
+  println!("[RECONNECT]");
 
   tokio::time::sleep(Duration::from_secs(10)).await;
 
-  web_socket
-    .unsubscribe(vec![
-      "btcusdt@ticker".to_string(),
-      "solusdt@ticker".to_string(),
-    ])
-    .await?;
-
-  web_socket
-    .unsubscribe(vec![
-      "btcusdt@ticker".to_string(),
-      "solusdt@ticker".to_string(),
-    ])
-    .await?;
-
-  tokio::time::sleep(Duration::from_secs(10)).await;
-
-  println!("disconnected");
+  web_socket.shutdown().await?;
 
   Ok(())
 }
@@ -100,6 +102,8 @@ async fn market_websocket() -> Result<()> {
   web_socket.subscribe(btc_trade).await?; // check error
 
   sleep(Duration::from_secs(30)).await;
+
+  web_socket.shutdown().await?;
 
   println!("disconnected");
 
