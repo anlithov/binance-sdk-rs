@@ -9,7 +9,7 @@ use anyhow::Result;
 // Custom order
 impl SpotTradeV3Manager {
   /// Configures and submit your custom order
-  async fn place_custom_order(
+  pub async fn place_custom_order(
     &self,
     order_request: PlaceOrderRequest,
   ) -> Result<OrderCreatedResponse> {
@@ -25,7 +25,7 @@ impl SpotTradeV3Manager {
   /// Configures and submit your custom order
   ///
   /// This order is sandboxed: it is validated, but not sent to the matching engine.
-  async fn test_place_custom_order(
+  pub async fn test_place_custom_order(
     &self,
     order_request: PlaceOrderRequest,
   ) -> Result<EmptyResponse> {

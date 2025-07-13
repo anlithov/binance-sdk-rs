@@ -1,4 +1,7 @@
-const REST_API_HOST: &str = "https://api.binance.com";
+use crate::rest::core::rate_limiter::RateLimitManager;
+use std::sync::Arc;
+
+pub const REST_API_HOST: &str = "https://api.binance.com";
 const WS_HOST: &str = "wss://stream.binance.com/ws";
 const FUTURES_REST_API_HOST: &str = "https://fapi.binance.com";
 const FUTURES_WS_HOST: &str = "wss://fstream.binance.com/ws";
@@ -9,8 +12,8 @@ pub struct Config {
   pub ws_host: String,
   pub futures_rest_api_host: String,
   pub futures_ws_host: String,
-
   pub recv_window: u64,
+  pub rate_limit_manager: Option<Arc<RateLimitManager>>,
 }
 
 impl Default for Config {
@@ -20,8 +23,8 @@ impl Default for Config {
       ws_host: WS_HOST.into(),
       futures_rest_api_host: FUTURES_REST_API_HOST.into(),
       futures_ws_host: FUTURES_WS_HOST.into(),
-
       recv_window: 5000,
+      rate_limit_manager: None,
     }
   }
 }
@@ -44,6 +47,7 @@ impl Config {
     self.ws_host = ws_host.into();
     self
   }
+
   pub fn set_futures_rest_api_endpoint<T: Into<String>>(
     mut self,
     futures_rest_api_host: T,
@@ -59,6 +63,11 @@ impl Config {
 
   pub fn set_recv_window(mut self, recv_window: u64) -> Self {
     self.recv_window = recv_window;
+    self
+  }
+
+  pub fn set_rate_limit_manager(mut self, rate_limit_manager: Arc<RateLimitManager>) -> Self {
+    self.rate_limit_manager = Some(rate_limit_manager);
     self
   }
 }

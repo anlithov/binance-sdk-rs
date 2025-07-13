@@ -1,7 +1,10 @@
+use anyhow::Result;
 use binance::client::Binance;
 use binance::rest::account_general::v1::AccountGeneralManagerV1;
 use dotenvy::dotenv;
 use std::env;
+
+pub type AnyhowResult<T> = Result<T>;
 
 macro_rules! handle_result {
   ($expression:expr) => {
@@ -13,22 +16,26 @@ macro_rules! handle_result {
 }
 
 #[tokio::main]
-async fn main() {
+async fn main() -> AnyhowResult<()> {
   dotenv().expect("Failed to read .env file");
 
-  account_api_restrictions_example().await;
+  account_api_restrictions_example().await?;
   /* trade_order_action_example().await;*/
+
+  Ok(())
 }
 
 #[allow(dead_code)]
-async fn account_api_restrictions_example() {
+async fn account_api_restrictions_example() -> AnyhowResult<()> {
   let api_key = Some(env::var("API_KEY").unwrap_or("YOUR_API_KEY".into()));
   let secret_key = Some(env::var("API_SECRET").unwrap_or("YOUR_API_KEY".into()));
 
-  let account_v1: AccountGeneralManagerV1 = Binance::new(api_key, secret_key);
+  let account_v1: AccountGeneralManagerV1 = Binance::new(api_key, secret_key).await?;
 
   handle_result!(
     // Get current account_general information.
     account_v1.fetch_api_restrictions().await
   );
+
+  Ok(())
 }

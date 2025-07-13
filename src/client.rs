@@ -1,6 +1,6 @@
 use crate::config::Config;
 use crate::rest::account_general::v1::AccountGeneralManagerV1;
-use crate::rest::inner_client::InnerClient;
+use crate::rest::core::inner_client::InnerClient;
 use crate::rest::spot::v3::account::SpotAccountManagerV3;
 use crate::rest::spot::v3::general::GeneralManagerV3;
 use crate::rest::spot::v3::market::SpotMarketV3Manager;
@@ -50,8 +50,14 @@ macro_rules! impl_binance_for {
         secret_key: Option<String>,
         config: &Config,
       ) -> Self {
+        let mut inner_client = InnerClient::new(api_key, secret_key, config.rest_api_host.clone());
+
+        if let Some(rate_limit_manager) = &config.rate_limit_manager {
+          inner_client = inner_client.with_rate_limit_manager(rate_limit_manager.clone());
+        }
+
         $typename {
-          client: InnerClient::new(api_key, secret_key, config.rest_api_host.clone()),
+          client: inner_client,
           recv_window: config.recv_window,
         }
       }

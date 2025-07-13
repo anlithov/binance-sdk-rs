@@ -1,6 +1,6 @@
 use crate::model::EmptyResponse;
+use crate::rest::core::inner_client::InnerClient;
 use crate::rest::endpoints::{SpotV3, API};
-use crate::rest::inner_client::InnerClient;
 use crate::rest::spot::v3::general::responses::ServerTimeResponse;
 use anyhow::Result;
 

@@ -138,15 +138,37 @@ pub struct TickerDaySummaryResponse {
 pub struct GeneralExchangeInfoResponse {
   pub timezone: String,
   pub server_time: u64,
-  pub rate_limits: Vec<InstrumentRateLimitIntervalResponse>,
+  pub rate_limits: Vec<RateLimitResponse>,
   pub symbols: Vec<InstrumentInfoResponse>,
+}
+
+/// Rate limit type as defined by Binance API
+#[derive(Debug, Clone, Deserialize, Serialize, Eq, PartialEq)]
+pub enum RateLimitTypeResponse {
+  #[serde(rename = "REQUEST_WEIGHT")]
+  RequestWeight,
+  #[serde(rename = "ORDERS")]
+  Orders,
+  #[serde(rename = "RAW_REQUESTS")]
+  RawRequests,
+}
+
+/// Rate limit interval as defined by Binance API
+#[derive(Debug, Clone, Deserialize, Serialize, Eq, PartialEq, Hash)]
+pub enum RateLimitIntervalResponse {
+  #[serde(rename = "SECOND")]
+  Second,
+  #[serde(rename = "MINUTE")]
+  Minute,
+  #[serde(rename = "DAY")]
+  Day,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
-pub struct InstrumentRateLimitIntervalResponse {
-  pub rate_limit_type: String,
-  pub interval: String,
+pub struct RateLimitResponse {
+  pub rate_limit_type: RateLimitTypeResponse,
+  pub interval: RateLimitIntervalResponse,
   pub interval_num: u64,
   pub limit: u64,
 }

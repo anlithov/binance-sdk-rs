@@ -40,7 +40,7 @@ impl SpotTradeV3Manager {
   /// Returning a `Transaction` value with the same parameters sent on the order.
   ///
   /// This order is sandboxed: it is validated, but not sent to the matching engine.
-  pub async fn test_здфсу_stop_limit_buy_order<S, F, PR, SPR>(
+  pub async fn test_place_stop_limit_buy_order<S, F, PR, SPR>(
     &self,
     symbol: S,
     qty: F,

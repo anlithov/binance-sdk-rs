@@ -43,7 +43,7 @@ pub struct AssetBalanceResponse {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
-pub struct RateLimitIntervalResponse {
+pub struct AccountRateLimitResponse {
   pub rate_limit_type: String,
   pub interval: String,
   pub interval_num: u64,

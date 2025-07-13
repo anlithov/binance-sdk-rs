@@ -24,6 +24,7 @@ anyhow = '1.0.98'
 tokio = { version = "1.46.1", features = ['macros', 'rt-multi-thread'] }
 tokio-tungstenite = { version = "0.27.0", features = ["tokio-native-tls", "native-tls"] }
 futures-util = "0.3.31"
+async-trait = "0.1.88"
 
 [dev-dependencies]
 dotenvy = "0.15.7"

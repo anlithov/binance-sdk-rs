@@ -1,9 +1,12 @@
+use anyhow::Result;
 use binance::client::*;
 use binance::rest::spot::v3::account::*;
 use binance::rest::spot::v3::market::SpotMarketV3Manager;
 use binance::rest::spot::v3::trade::SpotTradeV3Manager;
 use dotenvy::dotenv;
 use std::env;
+
+pub type AnyhowResult<T> = Result<T>;
 
 macro_rules! handle_result {
   ($expression:expr) => {
@@ -15,20 +18,22 @@ macro_rules! handle_result {
 }
 
 #[tokio::main]
-async fn main() {
+async fn main() -> AnyhowResult<()> {
   dotenv().expect("Failed to read .env file");
 
-  /*  account_balances_and_info_example().await;*/
-  /* trade_order_action_example().await;*/
-  account_order_action_example().await;
+  account_balances_and_info_example().await?;
+  /* trade_order_action_example().await?;*/
+  /* account_order_action_example().await?;*/
+
+  Ok(())
 }
 
 #[allow(dead_code)]
-async fn account_balances_and_info_example() {
+async fn account_balances_and_info_example() -> AnyhowResult<()> {
   let api_key = Some(env::var("API_KEY").unwrap_or("YOUR_API_KEY".into()));
   let secret_key = Some(env::var("API_SECRET").unwrap_or("YOUR_API_KEY".into()));
 
-  let account_v3: SpotAccountManagerV3 = Binance::new(api_key, secret_key);
+  let account_v3: SpotAccountManagerV3 = Binance::new(api_key, secret_key).await?;
 
   handle_result!(
     // Get current account_general information.
@@ -53,13 +58,15 @@ async fn account_balances_and_info_example() {
     // Get balance for a single Asset
     account_v3.fetch_balance_by_coin("USDT").await
   );
+
+  Ok(())
 }
 
-async fn account_order_info_example() {
+async fn account_order_info_example() -> AnyhowResult<()> {
   let api_key = Some(env::var("API_KEY").unwrap_or("YOUR_API_KEY".into()));
   let secret_key = Some(env::var("API_SECRET").unwrap_or("YOUR_API_KEY".into()));
 
-  let trade: SpotTradeV3Manager = Binance::new(api_key, secret_key);
+  let trade: SpotTradeV3Manager = Binance::new(api_key, secret_key).await?;
 
   handle_result!(
     //
@@ -69,20 +76,22 @@ async fn account_order_info_example() {
     //
     trade.list_open_orders_by_symbol("HBARUSDT").await
   );
+
+  Ok(())
 }
 
-async fn account_order_action_example() {
+async fn account_order_action_example() -> AnyhowResult<()> {
   let api_key = Some(env::var("API_KEY").unwrap_or("YOUR_API_KEY".into()));
   let secret_key = Some(env::var("API_SECRET").unwrap_or("YOUR_API_KEY".into()));
 
-  let market: SpotMarketV3Manager = Binance::new(api_key.clone(), secret_key.clone());
+  let market: SpotMarketV3Manager = Binance::new(api_key.clone(), secret_key.clone()).await?;
 
   handle_result!(
     //
     market.fetch_instrument_info("HBARUSDT").await
   );
 
-  let trade: SpotTradeV3Manager = Binance::new(api_key, secret_key);
+  let trade: SpotTradeV3Manager = Binance::new(api_key, secret_key).await?;
 
   handle_result!(
     //
@@ -94,4 +103,6 @@ async fn account_order_action_example() {
     //
     trade.place_market_sell_order("HBARUSDT", 30).await
   );
+
+  Ok(())
 }

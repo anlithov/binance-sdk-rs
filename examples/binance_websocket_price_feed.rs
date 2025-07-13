@@ -5,8 +5,10 @@ use dotenvy::dotenv;
 use std::time::Duration;
 use tokio::time::sleep;
 
+pub type AnyhowResult<T> = Result<T>;
+
 #[tokio::main]
-async fn main() -> Result<()> {
+async fn main() -> AnyhowResult<()> {
   dotenv().expect("Failed to read .env file");
 
   last_price_for_one_symbol().await?;
@@ -17,7 +19,7 @@ async fn main() -> Result<()> {
   Ok(())
 }
 
-async fn last_price_for_one_symbol() -> Result<()> {
+async fn last_price_for_one_symbol() -> AnyhowResult<()> {
   let mut btcusdt: f64 = 0.0;
 
   let callback = move |event: WebsocketSpotEvent| {
@@ -71,7 +73,7 @@ async fn last_price_for_one_symbol() -> Result<()> {
   Ok(())
 }
 
-async fn market_websocket() -> Result<()> {
+async fn market_websocket() -> AnyhowResult<()> {
   let btc_trade = vec!["btcusdt@trade".to_string()];
   let web_socket = WebSocketSpotStream::new(move |event: WebsocketSpotEvent| {
     match event {

@@ -1,6 +1,6 @@
 use crate::rest::account_general::v1::responses::AccountApiRestrictions;
+use crate::rest::core::inner_client::InnerClient;
 use crate::rest::endpoints::{AccountGeneral, API};
-use crate::rest::inner_client::InnerClient;
 use crate::util::build_signed_query;
 use anyhow::Result;
 use std::collections::BTreeMap;

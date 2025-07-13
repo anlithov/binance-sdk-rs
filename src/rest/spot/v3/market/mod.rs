@@ -1,4 +1,4 @@
-use crate::rest::inner_client::InnerClient;
+use crate::rest::core::inner_client::InnerClient;
 
 pub mod enums;
 pub mod market_depth;

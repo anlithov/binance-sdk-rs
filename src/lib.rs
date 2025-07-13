@@ -7,10 +7,11 @@
 )]
 #![allow(dead_code)]
 pub mod client;
-mod config;
+pub mod config;
 mod errors;
 pub mod model;
 pub mod rest;
+mod result;
 pub(crate) mod serde_helpers;
 mod util;
 pub mod websocket_stream;

@@ -2,7 +2,7 @@ use crate::rest::endpoints::{SpotV3, API};
 use crate::rest::spot::v3::user_stream::model::{Success, UserDataStream};
 use anyhow::Result;
 
-use crate::rest::inner_client::InnerClient;
+use crate::rest::core::inner_client::InnerClient;
 
 pub mod model;
 

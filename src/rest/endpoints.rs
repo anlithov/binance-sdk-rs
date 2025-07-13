@@ -1,3 +1,4 @@
+#[derive(Eq, Hash, PartialEq, Debug)]
 pub enum API {
   SpotV3(SpotV3),
   Savings(Savings),
@@ -8,6 +9,7 @@ pub enum API {
 /// Endpoint for production and test orders.
 ///
 /// Orders issued to test are validated, but not sent into the matching engine.
+#[derive(Eq, Hash, PartialEq, Clone, Debug)]
 pub enum SpotV3 {
   Ping,
   Time,
@@ -38,6 +40,7 @@ pub enum SpotV3 {
   UserDataStream,
 }
 
+#[derive(Eq, Hash, PartialEq, Debug)]
 pub enum Savings {
   AllCoins,
   AssetDetail,
@@ -45,6 +48,7 @@ pub enum Savings {
   SpotFuturesTransfer,
 }
 
+#[derive(Eq, Hash, PartialEq, Debug)]
 pub enum Futures {
   Ping,
   Time,
@@ -87,6 +91,7 @@ pub enum Futures {
   Income,
 }
 
+#[derive(Eq, Hash, PartialEq, Debug)]
 pub enum AccountGeneral {
   ApiRestrictions,
 }
@@ -115,12 +120,12 @@ impl AsRef<str> for API {
         SpotV3::OrderList => "/api/v3/orderList",
         SpotV3::AllOrderList => "/api/v3/allOrderList",
         SpotV3::OpenOrderList => "/api/v3/openOrderList",
-        SpotV3::Account => "/api/v3/account_general",
+        SpotV3::Account => "/api/v3/account",
         SpotV3::MyTrades => "/api/v3/myTrades",
         SpotV3::RateLimitOrder => "/api/v3/rateLimit/order",
         SpotV3::MyPreventedMatches => "/api/v3/myPreventedMatches",
         SpotV3::MyAllocations => "/api/v3/myAllocations",
-        SpotV3::AccountCommissions => "/api/v3/account_general/commission",
+        SpotV3::AccountCommissions => "/api/v3/account/commission",
         SpotV3::UserDataStream => "/api/v3/userDataStream",
       },
       API::Savings(route) => match route {
