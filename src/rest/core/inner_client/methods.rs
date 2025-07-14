@@ -1,4 +1,5 @@
 use crate::errors::BinanceContentError;
+use crate::rest::core::inner_client::rate_limit_manage::extract_and_update_rate_limiter_counts;
 use crate::rest::core::inner_client::InnerClient;
 use crate::rest::endpoints::API;
 use crate::result::AnyhowResult;
@@ -22,7 +23,7 @@ impl InnerClient {
       .acquire_ip_limit_permit(&endpoint, query.clone())
       .await?;
 
-    let url = self.build_signed_url(endpoint, query);
+    let url = self.build_signed_url(&endpoint, query);
     let http_client = &self.http_client;
 
     let response = http_client
@@ -31,7 +32,7 @@ impl InnerClient {
       .send()
       .await?;
 
-    self.handler(response).await
+    self.handler(response, &endpoint).await
   }
 
   pub async fn post_signed<T: DeserializeOwned>(
@@ -43,7 +44,7 @@ impl InnerClient {
       .acquire_ip_and_order_limits_permit(&endpoint, Some(query.clone()))
       .await?;
 
-    let url = self.build_signed_url(endpoint, Some(query));
+    let url = self.build_signed_url(&endpoint, Some(query));
 
     let http_client = &self.http_client;
     let response = http_client
@@ -53,7 +54,7 @@ impl InnerClient {
       .send()
       .await?;
 
-    self.handler(response).await
+    self.handler(response, &endpoint).await
   }
 
   pub async fn delete_signed<T: DeserializeOwned>(
@@ -65,7 +66,7 @@ impl InnerClient {
       .acquire_ip_limit_permit(&endpoint, query.clone())
       .await?;
 
-    let url = self.build_signed_url(endpoint, query);
+    let url = self.build_signed_url(&endpoint, query);
     let http_client = &self.http_client;
     let response = http_client
       .delete(url.as_str())
@@ -73,7 +74,7 @@ impl InnerClient {
       .send()
       .await?;
 
-    self.handler(response).await
+    self.handler(response, &endpoint).await
   }
 
   pub async fn get<T: DeserializeOwned>(
@@ -85,7 +86,7 @@ impl InnerClient {
       .acquire_ip_limit_permit(&endpoint, query.clone())
       .await?;
 
-    let mut url = self.build_url(endpoint);
+    let mut url = self.build_url(&endpoint);
     if let Some(request) = query {
       if !request.is_empty() {
         url.push_str(format!("?{}", request).as_str());
@@ -96,11 +97,11 @@ impl InnerClient {
 
     let response = http_client.get(url.as_str()).send().await?;
 
-    self.handler(response).await
+    self.handler(response, &endpoint).await
   }
 
   pub async fn post<T: DeserializeOwned>(&self, endpoint: API) -> AnyhowResult<T> {
-    let url = self.build_url(endpoint);
+    let url = self.build_url(&endpoint);
 
     let http_client = &self.http_client;
     let response = http_client
@@ -109,11 +110,11 @@ impl InnerClient {
       .send()
       .await?;
 
-    self.handler(response).await
+    self.handler(response, &endpoint).await
   }
 
   pub async fn put<T: DeserializeOwned>(&self, endpoint: API, listen_key: &str) -> AnyhowResult<T> {
-    let url = self.build_url(endpoint);
+    let url = self.build_url(&endpoint);
     let data: String = format!("listenKey={}", listen_key);
 
     let http_client = &self.http_client;
@@ -124,7 +125,7 @@ impl InnerClient {
       .send()
       .await?;
 
-    self.handler(response).await
+    self.handler(response, &endpoint).await
   }
 
   pub async fn delete<T: DeserializeOwned>(
@@ -132,7 +133,7 @@ impl InnerClient {
     endpoint: API,
     listen_key: &str,
   ) -> AnyhowResult<T> {
-    let url = self.build_url(endpoint);
+    let url = self.build_url(&endpoint);
     let data: String = format!("listenKey={}", listen_key);
 
     let http_client = &self.http_client;
@@ -143,10 +144,10 @@ impl InnerClient {
       .send()
       .await?;
 
-    self.handler(response).await
+    self.handler(response, &endpoint).await
   }
 
-  fn build_signed_url(&self, endpoint: API, query: Option<String>) -> String {
+  fn build_signed_url(&self, endpoint: &API, query: Option<String>) -> String {
     let mut signed_key =
       HmacSha256::new_from_slice(self.secret_key.as_ref().unwrap().as_bytes()).unwrap();
     let signed_query;
@@ -162,7 +163,7 @@ impl InnerClient {
     format!("{}{}?{}", self.server_host, endpoint.as_ref(), signed_query)
   }
 
-  fn build_url(&self, endpoint: API) -> String {
+  fn build_url(&self, endpoint: &API) -> String {
     format!("{}{}", self.server_host, endpoint.as_ref())
   }
 
@@ -187,12 +188,18 @@ impl InnerClient {
     Ok(custom_headers)
   }
 
-  async fn handler<T: DeserializeOwned>(&self, response: Response) -> AnyhowResult<T> {
+  async fn handler<T: DeserializeOwned>(
+    &self,
+    response: Response,
+    endpoint: &API,
+  ) -> AnyhowResult<T> {
     // Extract headers first to update rate limit usage
     let headers = response.headers().clone();
 
     // Process headers to update rate limit usage
-    if let Err(e) = self.extract_and_update_ip_used_weight(&headers).await {
+    if let Err(e) =
+      extract_and_update_rate_limiter_counts(&self.rate_limit_manager, &headers, endpoint).await
+    {
       eprintln!("Error updating used weights from headers: {}", e);
     }
 

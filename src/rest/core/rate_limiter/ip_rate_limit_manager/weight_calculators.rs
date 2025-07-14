@@ -1,5 +1,5 @@
 use crate::rest::core::rate_limiter::ip_rate_limit_manager::{
-	IpRateLimitManager, WeightCalculator,
+  IpRateLimitManager, WeightCalculator,
 };
 use crate::rest::endpoints::{AccountGeneral, Futures, Savings, SpotV3, API};
 
@@ -25,7 +25,7 @@ impl IpRateLimitManager {
         // Parse limit from query
         let query = query.unwrap();
         if let Some(limit_str) = Self::extract_param(query, "limit") {
-          if let Ok(limit) = limit_str.parse::<u32>() {
+          if let Ok(limit) = limit_str.parse::<u64>() {
             // Apply weights based on limit ranges
             match limit {
               0..=100 => 1,
@@ -342,13 +342,13 @@ impl IpRateLimitManager {
   }
 
   /// Helper function to extract a parameter value from a query string
-  fn extract_param<'a>(query: &'a str, param_name: &str) -> Option<&'a str> {
+  fn extract_param(query: String, param_name: &str) -> Option<String> {
     let param_prefix = format!("{}=", param_name);
     let parts: Vec<&str> = query.split('&').collect();
 
     for part in parts {
       if part.starts_with(&param_prefix) {
-        return Some(&part[param_prefix.len()..]);
+        return Some(part[param_prefix.len()..].to_string());
       }
     }
 

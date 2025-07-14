@@ -1,13 +1,8 @@
-use crate::rest::spot::v3::market::responses::RateLimitIntervalResponse;
-
 /// A more detailed error type for order rate limiting issues
 #[derive(Debug)]
 pub enum RateLimitError {
   /// Rate limit exceeded, with suggested wait time and limit type
-  LimitExceeded {
-    interval: RateLimitIntervalResponse,
-    interval_num: u64,
-  },
+  LimitExceeded { interval: String, interval_num: u64 },
   /// Lock acquisition failure
   LockError(String),
   /// Other error

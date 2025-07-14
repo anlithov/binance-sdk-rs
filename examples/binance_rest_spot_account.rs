@@ -33,7 +33,7 @@ async fn account_balances_and_info_example() -> AnyhowResult<()> {
   let api_key = Some(env::var("API_KEY").unwrap_or("YOUR_API_KEY".into()));
   let secret_key = Some(env::var("API_SECRET").unwrap_or("YOUR_API_KEY".into()));
 
-  let account_v3: SpotAccountManagerV3 = Binance::new(api_key, secret_key).await?;
+  let account_v3: SpotAccountManagerV3 = Binance::new(api_key, secret_key);
 
   handle_result!(
     // Get current account_general information.
@@ -66,7 +66,7 @@ async fn account_order_info_example() -> AnyhowResult<()> {
   let api_key = Some(env::var("API_KEY").unwrap_or("YOUR_API_KEY".into()));
   let secret_key = Some(env::var("API_SECRET").unwrap_or("YOUR_API_KEY".into()));
 
-  let trade: SpotTradeV3Manager = Binance::new(api_key, secret_key).await?;
+  let trade: SpotTradeV3Manager = Binance::new(api_key, secret_key);
 
   handle_result!(
     //
@@ -84,14 +84,14 @@ async fn account_order_action_example() -> AnyhowResult<()> {
   let api_key = Some(env::var("API_KEY").unwrap_or("YOUR_API_KEY".into()));
   let secret_key = Some(env::var("API_SECRET").unwrap_or("YOUR_API_KEY".into()));
 
-  let market: SpotMarketV3Manager = Binance::new(api_key.clone(), secret_key.clone()).await?;
+  let market: SpotMarketV3Manager = Binance::new(api_key.clone(), secret_key.clone());
 
   handle_result!(
     //
     market.fetch_instrument_info("HBARUSDT").await
   );
 
-  let trade: SpotTradeV3Manager = Binance::new(api_key, secret_key).await?;
+  let trade: SpotTradeV3Manager = Binance::new(api_key, secret_key);
 
   handle_result!(
     //

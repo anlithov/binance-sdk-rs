@@ -30,7 +30,7 @@ async fn market_example() -> AnyhowResult<()> {
   let api_key = Some(env::var("API_KEY").unwrap_or("YOUR_API_KEY".into()));
   let secret_key = Some(env::var("API_SECRET").unwrap_or("YOUR_API_KEY".into()));
 
-  let trade: SpotMarketV3Manager = Binance::new(api_key, secret_key).await?;
+  let trade: SpotMarketV3Manager = Binance::new(api_key, secret_key);
 
   handle_result!(
     //

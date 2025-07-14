@@ -1,5 +1,7 @@
 use crate::serde_helpers::string_to_float;
 use serde::{Deserialize, Serialize};
+use std::fmt;
+use std::fmt::Display;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -162,6 +164,12 @@ pub enum RateLimitIntervalResponse {
   Minute,
   #[serde(rename = "DAY")]
   Day,
+}
+
+impl Display for RateLimitIntervalResponse {
+  fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    write!(f, "{:?}", self)
+  }
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

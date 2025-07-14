@@ -30,7 +30,7 @@ async fn account_api_restrictions_example() -> AnyhowResult<()> {
   let api_key = Some(env::var("API_KEY").unwrap_or("YOUR_API_KEY".into()));
   let secret_key = Some(env::var("API_SECRET").unwrap_or("YOUR_API_KEY".into()));
 
-  let account_v1: AccountGeneralManagerV1 = Binance::new(api_key, secret_key).await?;
+  let account_v1: AccountGeneralManagerV1 = Binance::new(api_key, secret_key);
 
   handle_result!(
     // Get current account_general information.

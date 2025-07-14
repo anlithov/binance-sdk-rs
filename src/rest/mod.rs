@@ -5,4 +5,4 @@ pub mod spot;
 
 mod endpoints;
 
-pub(crate) mod core;
+pub mod core;

@@ -5,17 +5,18 @@ use crate::rest::core::rate_limiter::order_rate_limit_manager::{
   OrderIntervalAndNum, OrderRateLimitManager,
 };
 use crate::rest::core::rate_limiter::RateLimitManager;
+use crate::rest::spot::v3::account::responses::AccountRateLimitResponse;
 use crate::rest::spot::v3::market::responses::{RateLimitResponse, RateLimitTypeResponse};
 use std::sync::Arc;
 
 impl RateLimitManager {
   pub(crate) fn init_order_rate_limit_manager(
-    exchange_info: &Vec<RateLimitResponse>,
+    exchange_info: &Vec<AccountRateLimitResponse>,
   ) -> Arc<OrderRateLimitManager> {
     let mut order_rate_limit_manager = OrderRateLimitManager::new();
 
     for rate_limit in exchange_info {
-      if RateLimitTypeResponse::Orders.eq(&rate_limit.rate_limit_type) {
+      if rate_limit.rate_limit_type.eq("ORDERS") {
         order_rate_limit_manager.add_interval_and_limit(
           OrderIntervalAndNum {
             interval: rate_limit.interval.clone(),

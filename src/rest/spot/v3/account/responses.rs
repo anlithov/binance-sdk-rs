@@ -1,5 +1,7 @@
 use crate::serde_helpers::string_to_float;
 use serde::{Deserialize, Serialize};
+use std::fmt;
+use std::fmt::Display;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -41,11 +43,29 @@ pub struct AssetBalanceResponse {
   pub locked: f64,
 }
 
+/// Rate limit interval as defined by Binance API
+#[derive(Debug, Clone, Deserialize, Serialize, Eq, PartialEq, Hash)]
+pub enum AccountRateLimitIntervalResponse {
+  #[serde(rename = "SECOND")]
+  Second,
+  #[serde(rename = "MINUTE")]
+  Minute,
+  #[serde(rename = "DAY")]
+  Day,
+}
+
+impl Display for AccountRateLimitIntervalResponse {
+  fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    write!(f, "{:?}", self)
+  }
+}
+
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct AccountRateLimitResponse {
+  // Potentially always "ORDERS"
   pub rate_limit_type: String,
-  pub interval: String,
+  pub interval: AccountRateLimitIntervalResponse,
   pub interval_num: u64,
   pub limit: u64,
   pub count: u64,
