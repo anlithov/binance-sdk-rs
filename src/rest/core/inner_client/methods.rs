@@ -197,8 +197,13 @@ impl InnerClient {
     let headers = response.headers().clone();
 
     // Process headers to update rate limit usage
-    if let Err(e) =
-      extract_and_update_rate_limiter_counts(&self.rate_limit_manager, &headers, endpoint).await
+    if let Err(e) = extract_and_update_rate_limiter_counts(
+      &self.ip_rate_limit_manager,
+      &self.unfilled_order_rate_limit_manager,
+      &headers,
+      endpoint,
+    )
+    .await
     {
       eprintln!("Error updating used weights from headers: {}", e);
     }

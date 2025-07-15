@@ -52,8 +52,12 @@ macro_rules! impl_binance_for {
       ) -> Self {
         let mut inner_client = InnerClient::new(api_key, secret_key, config.rest_api_host.clone());
 
-        if let Some(rate_limit_manager) = &config.rate_limit_manager {
-          inner_client = inner_client.with_rate_limit_manager(rate_limit_manager.clone());
+        if let Some(rate_limit_manager) = &config.ip_rate_limit_manager {
+          inner_client = inner_client.with_ip_rate_limit_manager(rate_limit_manager.clone());
+        }
+        if let Some(rate_limit_manager) = &config.unfilled_order_rate_limit_manager {
+          inner_client =
+            inner_client.with_unfilled_order_rate_limit_manager(rate_limit_manager.clone());
         }
 
         $typename {

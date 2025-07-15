@@ -1,5 +1,5 @@
-use crate::rest::core::rate_limiter::order_rate_limit_manager::{
-  OrderIntervalAndNum, OrderRateLimitManager,
+use crate::rest::core::rate_limiter::unfilled_order_rate_limit_manager::{
+  OrderIntervalAndNum, UnfilledOrderRateLimitManager,
 };
 use crate::result::AnyhowResult;
 use anyhow::anyhow;
@@ -11,7 +11,7 @@ pub struct OrderRateIntervalSetup {
   pub order_limit: u64,
 }
 
-impl OrderRateLimitManager {
+impl UnfilledOrderRateLimitManager {
   /// Get the weight count for a specific interval in this period
   pub async fn order_count_this_period(&self, interval: &OrderIntervalAndNum) -> AnyhowResult<u64> {
     let count_rates = self.intervals.get(interval);

@@ -1,6 +1,10 @@
+use crate::config::REST_API_HOST;
+use crate::rest::core::inner_client::InnerClient;
 use crate::rest::core::rate_limiter::error::RateLimitError;
-use crate::rest::endpoints::API;
-use crate::rest::spot::v3::market::responses::RateLimitIntervalResponse;
+use crate::rest::endpoints::{SpotV3, API};
+use crate::rest::spot::v3::market::responses::{
+  GeneralExchangeInfoResponse, RateLimitIntervalResponse, RateLimitTypeResponse,
+};
 use crate::result::AnyhowResult;
 use anyhow::anyhow;
 use std::collections::HashMap;
@@ -81,7 +85,7 @@ pub struct IpRateLimitManager {
 
 impl IpRateLimitManager {
   /// Create a new rate limiter with default settings
-  pub(crate) fn new() -> Self {
+  pub async fn new() -> AnyhowResult<Arc<Self>> {
     let mut instance = Self {
       intervals: HashMap::new(),
       last_updated_limits: Arc::new(Mutex::new(Instant::now())),
@@ -93,7 +97,34 @@ impl IpRateLimitManager {
     // Initialize weight calculators
     instance.init_weight_calculators();
 
-    instance
+    let arc = Arc::new(instance);
+
+    // We want ip rate limiter, if defined, ALSO setup spent WEIGHT in the past.
+    // We put arc into InnerClient
+    // InnerClient handles response from any endpoint and updates the rate limiter
+    // then we dispose of Arc and return rate limiter with correct spent count
+    let client = InnerClient::new(None, None, REST_API_HOST.to_string())
+      .with_ip_rate_limit_manager(arc.clone());
+    let exchange_info: GeneralExchangeInfoResponse =
+      client.get(API::SpotV3(SpotV3::ExchangeInfo), None).await?;
+
+    drop(client);
+
+    let mut unwrapped = Arc::try_unwrap(arc).unwrap();
+
+    for rate_limit in exchange_info.rate_limits {
+      if RateLimitTypeResponse::RequestWeight.eq(&rate_limit.rate_limit_type) {
+        unwrapped.add_interval_and_limit(
+          IpIntervalAndNum {
+            interval: rate_limit.interval.clone(),
+            interval_num: rate_limit.interval_num,
+          },
+          rate_limit.limit,
+        );
+      }
+    }
+
+    Ok(Arc::new(unwrapped))
   }
 
   /// Acquire permission to make a request with a certain weight based on endpoint and query

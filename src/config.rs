@@ -1,4 +1,5 @@
-use crate::rest::core::rate_limiter::RateLimitManager;
+use crate::rest::core::rate_limiter::ip_rate_limit_manager::IpRateLimitManager;
+use crate::rest::core::rate_limiter::unfilled_order_rate_limit_manager::UnfilledOrderRateLimitManager;
 use std::sync::Arc;
 
 pub const REST_API_HOST: &str = "https://api.binance.com";
@@ -13,7 +14,8 @@ pub struct Config {
   pub futures_rest_api_host: String,
   pub futures_ws_host: String,
   pub recv_window: u64,
-  pub rate_limit_manager: Option<Arc<RateLimitManager>>,
+  pub ip_rate_limit_manager: Option<Arc<IpRateLimitManager>>,
+  pub unfilled_order_rate_limit_manager: Option<Arc<UnfilledOrderRateLimitManager>>,
 }
 
 impl Default for Config {
@@ -24,7 +26,8 @@ impl Default for Config {
       futures_rest_api_host: FUTURES_REST_API_HOST.into(),
       futures_ws_host: FUTURES_WS_HOST.into(),
       recv_window: 5000,
-      rate_limit_manager: None,
+      ip_rate_limit_manager: None,
+      unfilled_order_rate_limit_manager: None,
     }
   }
 }
@@ -66,8 +69,16 @@ impl Config {
     self
   }
 
-  pub fn set_rate_limit_manager(mut self, rate_limit_manager: Arc<RateLimitManager>) -> Self {
-    self.rate_limit_manager = Some(rate_limit_manager);
+  pub fn set_ip_rate_limit_manager(mut self, rate_limit_manager: Arc<IpRateLimitManager>) -> Self {
+    self.ip_rate_limit_manager = Some(rate_limit_manager);
+    self
+  }
+
+  pub fn set_unfilled_order_rate_limit_manager(
+    mut self,
+    rate_limit_manager: Arc<UnfilledOrderRateLimitManager>,
+  ) -> Self {
+    self.unfilled_order_rate_limit_manager = Some(rate_limit_manager);
     self
   }
 }

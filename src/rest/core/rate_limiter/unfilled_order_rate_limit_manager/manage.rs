@@ -1,11 +1,11 @@
-use crate::rest::core::rate_limiter::order_rate_limit_manager::{
-  OrderIntervalAndNum, OrderRateLimitInterval, OrderRateLimitManager,
+use crate::rest::core::rate_limiter::unfilled_order_rate_limit_manager::{
+  OrderIntervalAndNum, OrderRateLimitInterval, UnfilledOrderRateLimitManager,
 };
 use crate::result::AnyhowResult;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 
-impl OrderRateLimitManager {
+impl UnfilledOrderRateLimitManager {
   pub fn add_interval_and_limit(&mut self, interval: OrderIntervalAndNum, limit: u64) {
     self.intervals.insert(
       interval,

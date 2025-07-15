@@ -1,8 +1,15 @@
+use crate::config::REST_API_HOST;
+use crate::rest::core::inner_client::InnerClient;
 use crate::rest::core::rate_limiter::error::RateLimitError;
-use crate::rest::spot::v3::account::responses::AccountRateLimitIntervalResponse;
+use crate::rest::core::rate_limiter::ip_rate_limit_manager::IpRateLimitManager;
+use crate::rest::endpoints::{SpotV3, API};
+use crate::rest::spot::v3::account::responses::{
+  AccountRateLimitIntervalResponse, AccountRateLimitResponse,
+};
 use crate::result::AnyhowResult;
+use crate::util::build_signed_query;
 use anyhow::anyhow;
-use std::collections::HashMap;
+use std::collections::{BTreeMap, HashMap};
 use std::sync::Arc;
 use tokio::sync::Mutex;
 use tokio::time::Instant;
@@ -62,21 +69,66 @@ pub struct OrderRateLimitInterval {
   order_count: Arc<Mutex<u64>>,
 }
 
-/// OrderRateLimiter handles Binance's multi-tier order rate limits:
+/// UnfilledOrderRateLimitManager handles Binance's multi-tier order rate limits:
 #[derive(Debug)]
-pub struct OrderRateLimitManager {
+pub struct UnfilledOrderRateLimitManager {
   intervals: HashMap<OrderIntervalAndNum, OrderRateLimitInterval>,
   last_updated_limits: Arc<Mutex<Instant>>,
   last_updated_used_count: Arc<Mutex<Instant>>,
 }
 
-impl OrderRateLimitManager {
-  pub fn new() -> Self {
-    Self {
+impl UnfilledOrderRateLimitManager {
+  /// Creates a new unfilled order rate limit manager
+  /// Consumes points to fetch order rate limits and unfilled order counts
+  ///
+  /// *If ip_rate_limit_manager is defined, it will be used to count spent weight.
+  /// For this purpose, the ip rate limiter must be created first*
+  pub async fn new(
+    api_key: String,
+    secret_key: String,
+    ip_rate_limit_manager: Option<Arc<IpRateLimitManager>>,
+  ) -> AnyhowResult<Arc<Self>> {
+    let instance = Self {
       intervals: HashMap::new(),
       last_updated_limits: Arc::new(Mutex::new(Instant::now())),
       last_updated_used_count: Arc::new(Mutex::new(Instant::now())),
+    };
+
+    let arc = Arc::new(instance);
+
+    // We want ip rate limiter, if defined, ALSO setup spent WEIGHT in the past.
+    // We put arc into InnerClient
+    // InnerClient handles response from any endpoint and updates the rate limiter
+    // then we dispose of Arc and return rate limiter with correct spent count
+    let mut client = InnerClient::new(Some(api_key), Some(secret_key), REST_API_HOST.to_string());
+    if let Some(ip_rate_limit_manager) = ip_rate_limit_manager {
+      client = client.with_ip_rate_limit_manager(ip_rate_limit_manager);
     }
+    client = client.with_unfilled_order_rate_limit_manager(arc.clone());
+
+    let request = build_signed_query(BTreeMap::new(), 5000)?;
+    // To get used already counts
+    let account_order_rate_limits: Vec<AccountRateLimitResponse> = client
+      .get_signed(API::SpotV3(SpotV3::RateLimitOrder), Some(request))
+      .await?;
+
+    drop(client);
+
+    let mut unwrapped = Arc::try_unwrap(arc).unwrap();
+
+    for rate_limit in account_order_rate_limits {
+      if rate_limit.rate_limit_type.eq("ORDERS") {
+        unwrapped.add_interval_and_limit(
+          OrderIntervalAndNum {
+            interval: rate_limit.interval.clone(),
+            interval_num: rate_limit.interval_num,
+          },
+          rate_limit.limit,
+        );
+      }
+    }
+
+    Ok(Arc::new(unwrapped))
   }
 
   pub async fn orders_this_period(&self, interval: &OrderIntervalAndNum) -> AnyhowResult<u64> {
